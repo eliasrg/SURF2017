@@ -1,7 +1,8 @@
-def simulate(plant, channel):
+def simulate(plant, channel, encoder, decoder):
     yield
     while True:
-        b = channel.transmit(plant.y)
-        u = -plant.a * b
+        x_est = decoder.decode(
+                *(channel.transmit(p) for p in encoder.encode(plant.y)))
+        u = -plant.a * x_est
         plant.step(u)
         yield
