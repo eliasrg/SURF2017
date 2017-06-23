@@ -16,10 +16,11 @@ assert(a > 1) # unstable
 P0 = 100 # V[x0]
 W  = 1 # V[w(t)]
 V  = 1 # V[v(t)]
+SNR = 5 # 1 / V[n(t)]
 
 
 plant = Plant(a, gaussian(P0), gaussian(W), gaussian(V))
-channel = Channel(zero)
+channel = Channel(gaussian(1 / SNR))
 encoder = TrivialEncoder()
 decoder = TrivialDecoder()
 
