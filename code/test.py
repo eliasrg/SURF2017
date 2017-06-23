@@ -2,11 +2,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 import itertools as it
 
-from misc import onepoint, zero, gaussian
+from distributions import onepoint, zero, gaussian
 from system import Plant, Channel, LQGCost
 from simulation import simulate
 from coding import TrivialEncoder, TrivialDecoder
 
+
+# System coefficient
+a = 2
+assert(a > 1) # unstable
 
 # Variance (noise power)
 P0 = 100 # V[x0]
@@ -14,8 +18,7 @@ W  = 1 # V[w(t)]
 V  = 1 # V[v(t)]
 
 
-plant = Plant(2, gaussian(P0), gaussian(W), gaussian(V))
-# plant = Plant(2, onepoint(10000), zero, zero)
+plant = Plant(a, gaussian(P0), gaussian(W), gaussian(V))
 channel = Channel(zero)
 encoder = TrivialEncoder()
 decoder = TrivialDecoder()
