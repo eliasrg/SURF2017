@@ -1,7 +1,7 @@
 def simulate(plant, channel):
     yield
     while True:
-        b = channel.transmit(plant.a)
-        u = -b * plant.y
+        b = channel.transmit(plant.y)
+        u = -plant.a * b
         plant.step(u)
         yield
