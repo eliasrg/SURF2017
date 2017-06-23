@@ -3,7 +3,7 @@ def simulate(plant, channel, encoder, decoder, LQG):
     while True:
         x_est = decoder.decode(
                 *(channel.transmit(p) for p in encoder.encode(plant.y)))
-        u = -plant.a * x_est
+        u = -plant.alpha * x_est
         plant.step(u)
         LQG.step(u)
         yield

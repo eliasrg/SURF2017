@@ -9,8 +9,8 @@ from coding import TrivialEncoder, TrivialDecoder
 
 
 # System coefficient
-a = 2
-assert(a > 1) # unstable
+alpha = 2
+assert(alpha > 1) # unstable
 
 # Variance (noise power)
 P0 = 100 # V[x0]
@@ -19,7 +19,7 @@ V  = 1 # V[v(t)]
 SNR = 5 # 1 / V[n(t)]
 
 
-plant = Plant(a, gaussian(P0), gaussian(W), gaussian(V))
+plant = Plant(alpha, gaussian(P0), gaussian(W), gaussian(V))
 channel = Channel(gaussian(1 / SNR))
 encoder = TrivialEncoder()
 decoder = TrivialDecoder()
