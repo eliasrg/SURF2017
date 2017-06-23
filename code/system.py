@@ -20,3 +20,26 @@ class Channel:
 
     def transmit(self, a):
         return a + self.draw_n()
+
+
+"""A cost function of the form
+    J(T) = 1/T (F x(T+1)² + Σ{t = 1..t}(Q x(t)² + R u(t)²))."""
+class LQGCost:
+    def __init__(self, plant, Q, R, F):
+        self.plant = plant
+        self.Q = Q
+        self.R = R
+        self.F = F
+
+        self.x_sum = 0.0
+        self.u_sum = 0.0
+        self.last_x = plant.x
+
+    """To be called immediately after plant.step()"""
+    def step(self, u):
+        self.x_sum += self.Q * self.last_x * self.last_x
+        self.u_sum += self.R * u * u
+        self.last_x = self.plant.x
+
+    def evaluate(self):
+        return self.x_sum + self.u_sum + self.F * self.last_x
