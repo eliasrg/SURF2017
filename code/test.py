@@ -1,5 +1,6 @@
 import numpy as np
 import itertools as it
+
 from misc import onepoint, zero, gaussian
 from system import Plant, Channel
 from simulation import simulate

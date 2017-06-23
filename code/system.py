@@ -1,4 +1,4 @@
-"""The system {x(t+1) = x(t) + w(t) + u(t); y(t) = x(t) + v(t)}."""
+"""The system {x(t+1) = a x(t) + w(t) + u(t); y(t) = x(t) + v(t)}."""
 class Plant:
     def __init__(self, a, draw_x0, draw_w, draw_v):
         self.a = a
