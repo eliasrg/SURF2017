@@ -1,12 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import itertools as it
 
 from distributions import onepoint, zero, gaussian
 from system import Plant, Channel, LQGCost
 from simulation import simulate
 from coding import TrivialEncoder, TrivialDecoder
 
+
+# Time horizon
+T = 100
 
 # System coefficient
 alpha = 2
@@ -29,8 +31,8 @@ R = 1
 F = 1
 LQG = LQGCost(plant, Q, R, F)
 
-LQG_trajectory = [LQG.evaluate()
-        for _ in it.islice(simulate(plant, channel, encoder, decoder, LQG), 40)]
+LQG_trajectory = [LQG.evaluate(t)
+        for t in simulate(plant, channel, encoder, decoder, LQG, T + 1)]
 
-plt.plot(LQG_trajectory)
+plt.plot(range(0, T + 1), LQG_trajectory)
 plt.show()

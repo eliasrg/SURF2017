@@ -1,9 +1,9 @@
 class TrivialEncoder:
-    def encode(self, y):
+    def encode(self, t, y):
         return (y,)
 
 class TrivialDecoder:
-    def decode(self, *code):
+    def decode(self, t, *code):
         assert(len(code) == 1)
         return code[0]
 

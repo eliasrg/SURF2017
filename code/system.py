@@ -41,6 +41,11 @@ class LQGCost:
         self.u_sum += self.R * u * u
         self.last_x = self.plant.x
 
-    def evaluate(self):
-        """If called after T steps (i.e. at time T+1), will return J(T)."""
-        return self.x_sum + self.u_sum + self.F * self.last_x
+    def evaluate(self, t):
+        """If called at time t (i.e. after t-1 steps), will return J(t-1).
+
+    The parameter t must agree with the current simulation time."""
+        if t <= 1:
+            return float('nan')
+        else:
+            return (self.x_sum + self.u_sum + self.F * self.last_x) / (t - 1)
