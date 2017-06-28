@@ -3,22 +3,18 @@ import matplotlib.pyplot as plt
 
 from distributions import onepoint, zero, gaussian
 from system import Plant, Channel, LQGCost
-from simulation import simulate
+from simulation import simulate, Parameters
 from coding import TrivialEncoder, TrivialDecoder
 
 
-# Time horizon
-T = 100
+params = Parameters(
+        T = 100,
+        alpha = 2,
+        P0 = 100,
+        W = 1, V = 1, SNR = 5,
+        Q = 1, R = 1, F = 1)
 
-# System coefficient
-alpha = 2
-assert(alpha > 1) # unstable
-
-# Variance (noise power)
-P0 = 100 # V[x0]
-W  = 1 # V[w(t)]
-V  = 1 # V[v(t)]
-SNR = 5 # 1 / V[n(t)]
+locals().update(params.all()) # Bring parameters into scope
 
 
 plant = Plant(alpha, gaussian(P0), gaussian(W), gaussian(V))
@@ -26,10 +22,8 @@ channel = Channel(gaussian(1 / SNR))
 encoder = TrivialEncoder()
 decoder = TrivialDecoder()
 
-Q = 1
-R = 1
-F = 1
 LQG = LQGCost(plant, Q, R, F)
+
 
 LQG_trajectory = [LQG.evaluate(t)
         for t in simulate(plant, channel, encoder, decoder, LQG, T + 1)]
