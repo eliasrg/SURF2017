@@ -1,17 +1,33 @@
+from distributions import onepoint, zero, gaussian
+from system import Plant, Channel, LQGCost
+from coding import TrivialEncoder, TrivialDecoder
 from utilities import memoized
 
-def simulate(plant, channel, encoder, decoder, LQG, T):
-    # TODO Initialize DP evaluator and pass it to encoder and decoder
-    t = 1
-    yield t
-    while t < T:
-        x_est = decoder.decode(t,
-                *(channel.transmit(p) for p in encoder.encode(t, plant.y)))
-        u = -plant.alpha * x_est
-        plant.step(u)
-        LQG.step(u)
-        t += 1
+class Simulation:
+    def __init__(self, params):
+        self.params = params
+
+        self.plant = Plant(params.alpha, gaussian(params.P0),
+                gaussian(params.W), gaussian(params.V))
+        self.channel = Channel(gaussian(1 / params.SNR))
+        self.encoder = TrivialEncoder()
+        self.decoder = TrivialDecoder()
+
+        self.LQG = LQGCost(self.plant, params.Q, params.R, params.F)
+
+    def simulate(self, T):
+        # TODO Initialize DP evaluator and pass it to encoder and decoder
+        t = 1
         yield t
+        while t < T:
+            x_est = self.decoder.decode(t,
+                    *(self.channel.transmit(p)
+                        for p in self.encoder.encode(t, self.plant.y)))
+            u = -self.plant.alpha * x_est
+            self.plant.step(u)
+            self.LQG.step(u)
+            t += 1
+            yield t
 
 
 class Parameters:
