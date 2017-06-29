@@ -3,6 +3,8 @@ from system import Plant, Channel, LQGCost
 from coding import TrivialEncoder, TrivialDecoder
 from utilities import memoized
 
+from types import SimpleNamespace
+
 class Simulation:
     def __init__(self, params):
         self.params = params
@@ -15,17 +17,22 @@ class Simulation:
 
         self.LQG = LQGCost(self.plant, params.Q, params.R, params.F)
 
+        # Globally known data
+        self.globals = SimpleNamespace()
+        self.globals.u = dict()
+
     def simulate(self, T):
         # TODO Initialize DP evaluator and pass it to encoder and decoder
         t = 1
         yield t
         while t < T:
-            x_est = self.decoder.decode(t,
+            x_est = self.decoder.decode(self, t,
                     *(self.channel.transmit(p)
-                        for p in self.encoder.encode(t, self.plant.y)))
+                        for p in self.encoder.encode(self, t, self.plant.y)))
             u = -self.plant.alpha * x_est
             self.plant.step(u)
             self.LQG.step(u)
+            self.globals.u[t] = u
             t += 1
             yield t
 
