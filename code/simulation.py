@@ -88,3 +88,19 @@ class Parameters:
         else:
             raise ValueError("({}, {}) not on the form (t, t) or (t+1, t)"
                              .format(t, t_obs))
+
+    @memoized
+    def L(self, t):
+        S = self.S(t+1)
+        return self.alpha * S / (S + self.R)
+
+    @memoized
+    def S(self, t):
+        if t == self.T:
+            return self.F
+        elif 1 <= t < self.T:
+            S = self.S(t+1)
+            return self.alpha**2 * self.R * S / (S + self.R) + self.Q
+        else:
+            raise ValueError(("S({}) undefined because {} is out of the range "
+                    + "[1, T = {}]").format(t, t, self.T))
