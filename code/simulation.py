@@ -1,6 +1,6 @@
 from distributions import onepoint, zero, gaussian
 from system import Plant, Channel, LQGCost
-from coding import TrivialEncoder, TrivialDecoder
+from coding import TrivialEncoder, TrivialDecoder, Encoder, Decoder
 from utilities import memoized
 
 from types import SimpleNamespace
@@ -9,26 +9,28 @@ class Simulation:
     def __init__(self, params):
         self.params = params
 
+        # Globally known data
+        self.globals = SimpleNamespace()
+        # u[t]: control signal at time t
+        self.globals.u = dict()
+        # x_est_r[t1, t2]: receiver estimate of x(t1) at time t2
+        self.globals.x_est_r = dict()
+
         self.plant = Plant(params.alpha, gaussian(params.P0),
                 gaussian(params.W), gaussian(params.V))
         self.channel = Channel(gaussian(1 / params.SNR))
-        self.encoder = TrivialEncoder()
-        self.decoder = TrivialDecoder()
+        self.encoder = Encoder()
+        self.decoder = Decoder(self)
 
         self.LQG = LQGCost(self.plant, params.Q, params.R, params.F)
-
-        # Globally known data
-        self.globals = SimpleNamespace()
-        self.globals.u = dict()
 
     def simulate(self, T):
         t = 1
         yield t
         while t < T:
-            x_est = self.decoder.decode(self, t,
+            u = self.decoder.decode(self, t,
                     *(self.channel.transmit(p)
                         for p in self.encoder.encode(self, t, self.plant.y)))
-            u = -self.plant.alpha * x_est
             self.plant.step(u)
             self.LQG.step(u)
             self.globals.u[t] = u
@@ -37,7 +39,7 @@ class Simulation:
 
 
 class Parameters:
-    def __init__(self, T, alpha, P0, W, V, SNR, Q, R, F):
+    def __init__(self, T, alpha, P0, W, V, SNR, SDR0, Q, R, F):
         self.T = T # Time horizon
         self.alpha = alpha # System coefficient
         assert(alpha > 1) # unstable
@@ -47,6 +49,7 @@ class Parameters:
         self.W = W # V[w_t]
         self.V = V # V[v_t]
         self.SNR = SNR # 1 / V[n_t]
+        self.SDR0 = SDR0 # Channel code signal-distortion ratio, 1 / V[neff_t]
 
         # LQG parameters
         self.Q = Q

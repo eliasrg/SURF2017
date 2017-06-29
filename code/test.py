@@ -8,7 +8,7 @@ params = Parameters(
         T = 100,
         alpha = 2,
         P0 = 100,
-        W = 1, V = 1, SNR = 5,
+        W = 1, V = 1, SNR = 5, SDR0 = 1e100,
         Q = 1, R = 1, F = 1)
 
 globals().update(params.all()) # Bring parameters into scope
