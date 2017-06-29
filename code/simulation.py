@@ -22,7 +22,6 @@ class Simulation:
         self.globals.u = dict()
 
     def simulate(self, T):
-        # TODO Initialize DP evaluator and pass it to encoder and decoder
         t = 1
         yield t
         while t < T:
@@ -58,25 +57,34 @@ class Parameters:
         names = ['T', 'alpha', 'P0', 'W', 'V', 'SNR', 'Q', 'R', 'F']
         return {name: self.__dict__[name] for name in names}
 
+    # Statically known parameters computed recursively using memoization
+
     @memoized
-    def Pt(t, t_obs):
-        if t == 1:
+    def Pt(self, t, t_obs):
+        if (t, t_obs) == (1, 0):
             return self.P0
         elif t_obs == t:
             return self.Kt(t) * self.V
         elif t_obs == t-1:
             return self.alpha**2 * self.Pt(t-1, t-1) + self.W
+        else:
+            raise ValueError("({}, {}) not on the form (t, t) or (t+1, t)"
+                             .format(t, t_obs))
 
     @memoized
-    def Kt(t):
+    def Kt(self, t):
         P = self.Pt(t, t-1)
-        return P / (P + V)
+        return P / (P + self.V)
 
     @memoized
-    def Pr(t, t_obs):
-        if False: # TODO Which is the right base case?
-            pass
+    def Pr(self, t, t_obs):
+        if (t, t_obs) == (1, 0):
+            return self.P0
         elif t_obs == t:
-            return (self.Pr(t, t-1) + self.SDR0 * self.Pt(t, t))
+            return ((self.Pr(t, t-1) + self.SDR0 * self.Pt(t, t))
+                    / (1 + self.SDR0))
         elif t_obs == t-1:
-            return self.alpha**2 * self.Pr(t-1, t-1) + W
+            return self.alpha**2 * self.Pr(t-1, t-1) + self.W
+        else:
+            raise ValueError("({}, {}) not on the form (t, t) or (t+1, t)"
+                             .format(t, t_obs))
