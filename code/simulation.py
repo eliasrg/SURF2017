@@ -61,6 +61,10 @@ class Parameters:
         self.KC = KC
         self.KS = KS
 
+        # Pre-evaluate L(t) in the right order to avoid blowing the stack
+        for t in range(self.T, 0, -1):
+            self.L(t)
+
     def all(self):
         names = ['T', 'alpha', 'P1', 'W', 'V', 'SNR', 'Q', 'R', 'F', 'KC', 'KS']
         return {name: self.__dict__[name] for name in names}
