@@ -1,4 +1,5 @@
 import numpy as np
+from math import sqrt
 from typing import NewType, Callable
 
 Sampler = NewType('Sampler', Callable[[], float])
@@ -9,4 +10,5 @@ def onepoint(x) -> Sampler:
 zero = onepoint(0)
 
 def gaussian(var: float) -> Sampler:
-    return lambda: np.random.normal(0, var)
+    stddev = sqrt(var)
+    return lambda: np.random.normal(0, stddev)
