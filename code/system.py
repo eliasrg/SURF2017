@@ -1,12 +1,12 @@
 class Plant:
     """The system {x(t+1) = a x(t) + w(t) + u(t); y(t) = x(t) + v(t)}."""
-    def __init__(self, alpha, draw_x0, draw_w, draw_v):
+    def __init__(self, alpha, draw_x1, draw_w, draw_v):
         self.alpha = alpha
-        self.draw_x0 = draw_x0
+        self.draw_x1 = draw_x1
         self.draw_w = draw_w
         self.draw_v = draw_v
 
-        self.x = draw_x0()
+        self.x = draw_x1()
         self.y = self.x + self.draw_v()
 
     def step(self, u):

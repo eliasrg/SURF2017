@@ -16,7 +16,7 @@ class Simulation:
         # x_est_r[t1, t2]: receiver estimate of x(t1) at time t2
         self.globals.x_est_r = dict()
 
-        self.plant = Plant(params.alpha, gaussian(params.P0),
+        self.plant = Plant(params.alpha, gaussian(params.P1),
                 gaussian(params.W), gaussian(params.V))
         self.channel = Channel(gaussian(1 / params.SNR))
         self.encoder = Encoder()
@@ -39,13 +39,13 @@ class Simulation:
 
 
 class Parameters:
-    def __init__(self, T, alpha, P0, W, V, SNR, SDR0, Q, R, F):
+    def __init__(self, T, alpha, P1, W, V, SNR, SDR0, Q, R, F):
         self.T = T # Time horizon
         self.alpha = alpha # System coefficient
         assert(alpha > 1) # unstable
 
         # Variance (noise power) parameters
-        self.P0 = P0 # V[x0]
+        self.P1 = P1 # V[x_1]
         self.W = W # V[w_t]
         self.V = V # V[v_t]
         self.SNR = SNR # 1 / V[n_t]
@@ -57,7 +57,7 @@ class Parameters:
         self.F = F
 
     def all(self):
-        names = ['T', 'alpha', 'P0', 'W', 'V', 'SNR', 'Q', 'R', 'F']
+        names = ['T', 'alpha', 'P1', 'W', 'V', 'SNR', 'Q', 'R', 'F']
         return {name: self.__dict__[name] for name in names}
 
     # Statically known parameters computed recursively using memoization
@@ -65,7 +65,7 @@ class Parameters:
     @memoized
     def Pt(self, t, t_obs):
         if (t, t_obs) == (1, 0):
-            return self.P0
+            return self.P1
         elif t_obs == t:
             return self.Kt(t) * self.V
         elif t_obs == t-1:
@@ -82,7 +82,7 @@ class Parameters:
     @memoized
     def Pr(self, t, t_obs):
         if (t, t_obs) == (1, 0):
-            return self.P0
+            return self.P1
         elif t_obs == t:
             return ((self.Pr(t, t-1) + self.SDR0 * self.Pt(t, t))
                     / (1 + self.SDR0))
@@ -99,9 +99,9 @@ class Parameters:
 
     @memoized
     def S(self, t):
-        if t == self.T:
+        if t == self.T + 1:
             return self.F
-        elif 1 <= t < self.T:
+        elif 1 <= t <= self.T:
             S = self.S(t+1)
             return self.alpha**2 * self.R * S / (S + self.R) + self.Q
         else:

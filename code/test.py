@@ -7,7 +7,7 @@ from simulation import Simulation, Parameters
 params = Parameters(
         T = 100,
         alpha = 2,
-        P0 = 100,
+        P1 = 1, # Same as W
         W = 1, V = 1, SNR = 5, SDR0 = 1e100,
         Q = 1, R = 1, F = 1)
 
