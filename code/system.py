@@ -37,8 +37,8 @@ class LQGCost:
 
     def step(self, u):
         """To be called immediately after plant.step()"""
-        self.x_sum += self.Q * self.last_x * self.last_x
-        self.u_sum += self.R * u * u
+        self.x_sum += self.Q * self.last_x**2
+        self.u_sum += self.R * u**2
         self.last_x = self.plant.x
 
     def evaluate(self, t):
@@ -48,4 +48,4 @@ class LQGCost:
         if t <= 1:
             return float('nan')
         else:
-            return (self.x_sum + self.u_sum + self.F * self.last_x) / (t - 1)
+            return (self.x_sum + self.u_sum + self.F * self.last_x**2) / (t - 1)
