@@ -66,7 +66,7 @@ class Decoder:
         s_est = sqrt(sim.params.Pr(t, t-1) - sim.params.Pr(t, t)) * s_norm_est
 
         # Construct the estimate of x(t) (11)
-        self.x_est += sim.params.SDR0 / (1 + sim.params.SDR0)
+        self.x_est += sim.params.SDR0 / (1 + sim.params.SDR0) * s_est
         sim.globals.x_est_r[t, t] = self.x_est
 
         # Generate the control signal (below (12))
