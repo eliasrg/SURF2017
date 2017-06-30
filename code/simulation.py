@@ -4,6 +4,7 @@ from coding import TrivialEncoder, TrivialDecoder, Encoder, Decoder
 from utilities import memoized
 
 from types import SimpleNamespace
+import numpy as np
 
 class Simulation:
     def __init__(self, params):
@@ -39,7 +40,7 @@ class Simulation:
 
 
 class Parameters:
-    def __init__(self, T, alpha, P1, W, V, SNR, SDR0, Q, R, F):
+    def __init__(self, T, alpha, P1, W, V, SNR, SDR0, Q, R, F, KC, KS):
         self.T = T # Time horizon
         self.alpha = alpha # System coefficient
         assert(alpha > 1) # unstable
@@ -56,8 +57,12 @@ class Parameters:
         self.R = R
         self.F = F
 
+        # Channel usage parameters
+        self.KC = KC
+        self.KS = KS
+
     def all(self):
-        names = ['T', 'alpha', 'P1', 'W', 'V', 'SNR', 'Q', 'R', 'F']
+        names = ['T', 'alpha', 'P1', 'W', 'V', 'SNR', 'Q', 'R', 'F', 'KC', 'KS']
         return {name: self.__dict__[name] for name in names}
 
     # Statically known parameters computed recursively using memoization
@@ -107,3 +112,53 @@ class Parameters:
         else:
             raise ValueError(("S({}) undefined because {} is out of the range "
                     + "[1, T = {}]").format(t, t, self.T))
+
+    # Infinite horizon values
+    @memoized
+    def S_inf(self):
+        return next(filter(lambda S: S > 0,
+                np.polynomial.polynomial.Polynomial(list(reversed([
+                    1,
+                    -(self.Q + (self.alpha**2 - 1) * self.R),
+                    -self.Q * self.R]))).roots()))
+
+    @memoized
+    def Pt_inf(self):
+        return next(filter(lambda S: S > 0,
+                np.polynomial.polynomial.Polynomial(list(reversed([
+                    1,
+                    -((self.alpha**2 - 1) * self.V + self.W),
+                    -self.V * self.W]))).roots()))
+
+    @memoized
+    def Pt_inf_bar(self):
+        Pt = self.Pt_inf()
+        return Pt * self.V / (Pt + self.V)
+
+    @memoized
+    def LQR_inf_classical(self):
+        Pt = self.Pt_inf()
+        Pt_bar = self.Pt_inf_bar()
+        return self.Q * Pt_bar + self.S_inf() * (Pt - Pt_bar)
+
+    @memoized
+    def LQR_inf_upper_bound(self):
+        Pt = self.Pt_inf()
+        Pt_bar = self.Pt_inf_bar()
+        return (self.LQR_inf_classical()
+                + (self.Q + (self.alpha**2 - 1) * self.S_inf())
+                    / (1 + self.SDR0 - self.alpha**2)
+                  * (Pt - Pt_bar))
+
+    @memoized
+    def LQR_inf_lower_bound(self):
+        Pt = self.Pt_inf()
+        Pt_bar = self.Pt_inf_bar()
+        return (self.LQR_inf_classical()
+                + (self.Q + (self.alpha**2 - 1) * self.S_inf())
+                    / (1 + self.SDR_OPTA() - self.alpha**2)
+                  * (Pt - Pt_bar))
+
+    @memoized
+    def SDR_OPTA(self):
+        return (1 + self.SNR)**(self.KC / self.KS) - 1
