@@ -46,7 +46,7 @@ class Decoder:
         s_norm_est = code[0]
 
         # Unnormalize (10a)
-        s_est = sqrt(sim.params.Pr(t, t-1) - sim.params.Pr(t, t)) * s_norm_est
+        s_est = sqrt(sim.params.Pr(t, t-1) - sim.params.Pt(t, t)) * s_norm_est
 
         # Construct the estimate of x(t) (11)
         self.x_est += sim.params.SDR0 / (1 + sim.params.SDR0) * s_est
