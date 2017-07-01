@@ -18,7 +18,7 @@ class Encoder:
 
     def encode(self, sim, t, y):
         # Kalman filter prediction of x(t)
-        x_pred = (0 if t == 1
+        self.x_est = (0 if t == 1
                   else sim.params.alpha * self.x_est + sim.globals.u[t-1])
 
         # Update Kalman filter
