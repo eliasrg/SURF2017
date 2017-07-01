@@ -13,8 +13,7 @@ class TrivialDecoder:
 
 class Encoder:
     def __init__(self):
-        # Initialize Kalman filter
-        self.x_est = 0 # First prediction
+        pass
 
     def encode(self, sim, t, y):
         # Kalman filter prediction of x(t)
@@ -38,7 +37,7 @@ class Decoder:
     def __init__(self, sim):
         # Initialize MMSE estimate
         self.x_est = 0
-        sim.globals.x_est_r[1, 0] = 0
+        sim.globals.x_est_r[1, 0] = self.x_est
 
     def decode(self, sim, t, *code):
         # Trivial decoding of s_norm_est
