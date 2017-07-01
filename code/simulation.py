@@ -27,16 +27,16 @@ class Simulation:
 
     def simulate(self, T):
         t = 1
-        yield t
-        while t < T:
+        while t <= T:
             u = self.decoder.decode(self, t,
                     *(self.channel.transmit(p)
                         for p in self.encoder.encode(self, t, self.plant.y)))
+            self.globals.u[t] = u
+            yield t
             self.plant.step(u)
             self.LQG.step(u)
-            self.globals.u[t] = u
             t += 1
-            yield t
+        yield t
 
 
 class Parameters:
@@ -115,7 +115,7 @@ class Parameters:
             return self.alpha**2 * self.R * S / (S + self.R) + self.Q
         else:
             raise ValueError(("S({}) undefined because {} is out of the range "
-                    + "[1, T = {}]").format(t, t, self.T))
+                    + "[1, T + 1 = {}]").format(t, t, self.T + 1))
 
     # Infinite horizon values
     @memoized
