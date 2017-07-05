@@ -21,10 +21,10 @@ class Simulation:
         self.plant = Plant(params.alpha, gaussian(params.P1),
                 gaussian(params.W), gaussian(params.V))
         self.channel = Channel(gaussian(1 / params.SNR))
-        self.observer = Observer()
+        self.observer = Observer(self)
         self.controller = Controller(self)
-        self.encoder = TrivialEncoder()
-        self.decoder = TrivialDecoder()
+        self.encoder = TrivialEncoder(self)
+        self.decoder = TrivialDecoder(self)
 
         self.LQG = LQGCost(self.plant, params.Q, params.R, params.F)
 
@@ -32,7 +32,7 @@ class Simulation:
         t = 1
         while t <= T:
             # The observer observes the plant and generates a message
-            msg = self.observer.observe(self, t, self.plant.y)
+            msg = self.observer.observe(t, self.plant.y)
             # The encoder encodes the message
             code = self.encoder.encode(*msg)
             # The encoded message is sent over the channel
@@ -40,7 +40,7 @@ class Simulation:
             # The decoder decodes the encoded message
             msg_recv = self.decoder.decode(*code_recv)
             # The controller receives the message and generates a control signal
-            u = self.controller.control(self, t, *msg_recv)
+            u = self.controller.control(t, *msg_recv)
             self.globals.u[t] = u
 
             yield t

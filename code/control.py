@@ -1,21 +1,26 @@
 from math import sqrt
 
 class TrivialObserver:
-    def observe(self, sim, t, y):
+    def __init__(self, sim):
+        self.sim = sim
+
+    def observe(self, t, y):
         return (y,)
 
 class TrivialController:
-    def control(self, sim, t, *msg):
+    def control(self, t, *msg):
         assert(len(msg) == 1)
         x_est = msg[0]
-        return -sim.params.alpha * x_est
+        return -self.sim.params.alpha * x_est
 
 
 class Observer:
-    def __init__(self):
-        pass
+    def __init__(self, sim):
+        self.sim = sim
 
-    def observe(self, sim, t, y):
+    def observe(self, t, y):
+        sim = self.sim
+
         # Kalman filter prediction of x(t)
         self.x_est = (0 if t == 1
                   else sim.params.alpha * self.x_est + sim.globals.u[t-1])
@@ -35,11 +40,15 @@ class Observer:
 
 class Controller:
     def __init__(self, sim):
+        self.sim = sim
+
         # Initialize MMSE estimate
         self.x_est = 0
         sim.globals.x_est_r[1, 0] = self.x_est
 
-    def control(self, sim, t, *msg):
+    def control(self, t, *msg):
+        sim = self.sim
+
         # Receive s_norm_est from decoder
         assert(len(msg) == 1)
         s_norm_est = msg[0]
