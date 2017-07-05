@@ -39,6 +39,9 @@ class BitChannel:
         assert(all(isinstance(x, int)) for x in msg)
         return msg
 
+    def average_power(self):
+        return float('nan')
+
 
 class LQGCost:
     """A cost function of the form
