@@ -1,6 +1,6 @@
 from distributions import onepoint, zero, gaussian
 from system import Plant, Channel, LQGCost
-from coding import TrivialEncoder, TrivialDecoder, Encoder, Decoder
+from control import TrivialEncoder, TrivialDecoder, Encoder, Decoder
 from utilities import memoized
 
 from types import SimpleNamespace
