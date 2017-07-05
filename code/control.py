@@ -1,21 +1,21 @@
 from math import sqrt
 
-class TrivialEncoder:
-    def encode(self, sim, t, y):
+class TrivialObserver:
+    def observe(self, sim, t, y):
         return (y,)
 
-class TrivialDecoder:
-    def decode(self, sim, t, *code):
-        assert(len(code) == 1)
-        x_est = code[0]
+class TrivialController:
+    def control(self, sim, t, *msg):
+        assert(len(msg) == 1)
+        x_est = msg[0]
         return -sim.params.alpha * x_est
 
 
-class Encoder:
+class Observer:
     def __init__(self):
         pass
 
-    def encode(self, sim, t, y):
+    def observe(self, sim, t, y):
         # Kalman filter prediction of x(t)
         self.x_est = (0 if t == 1
                   else sim.params.alpha * self.x_est + sim.globals.u[t-1])
@@ -29,20 +29,20 @@ class Encoder:
         # Normalize it (9)
         s_norm = s / sqrt(sim.params.Pr(t, t-1) - sim.params.Pt(t, t))
 
-        # Send with trivial coding
+        # Send to the encoder
         return (s_norm,)
 
 
-class Decoder:
+class Controller:
     def __init__(self, sim):
         # Initialize MMSE estimate
         self.x_est = 0
         sim.globals.x_est_r[1, 0] = self.x_est
 
-    def decode(self, sim, t, *code):
-        # Trivial decoding of s_norm_est
-        assert(len(code) == 1)
-        s_norm_est = code[0]
+    def control(self, sim, t, *msg):
+        # Receive s_norm_est from decoder
+        assert(len(msg) == 1)
+        s_norm_est = msg[0]
 
         # Unnormalize (10a)
         s_est = sqrt(sim.params.Pr(t, t-1) - sim.params.Pt(t, t)) * s_norm_est
