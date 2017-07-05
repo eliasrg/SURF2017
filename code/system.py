@@ -14,13 +14,15 @@ class Plant:
         self.y = self.x + self.draw_v()
 
 
-class Channel:
+class RealChannel:
+    """Transmits real numbers with additive noise."""
     def __init__(self, draw_n):
         self.draw_n = draw_n
         self.total_power = 0
         self.uses = 0
 
     def transmit(self, msg):
+        """msg is a sequence of real numbers"""
         for a in msg:
             self.total_power += a**2
         self.uses += 1

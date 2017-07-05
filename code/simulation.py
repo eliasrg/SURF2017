@@ -1,5 +1,5 @@
 from distributions import onepoint, zero, gaussian
-from system import Plant, Channel, LQGCost
+from system import Plant, RealChannel, LQGCost
 from control import TrivialObserver, TrivialController, Observer, Controller
 from coding import TrivialEncoder, TrivialDecoder
 from utilities import memoized
@@ -21,7 +21,7 @@ class Simulation:
 
         self.plant = Plant(params.alpha, gaussian(params.W),
                 gaussian(params.W), gaussian(params.V))
-        self.channel = Channel(gaussian(1 / params.SNR))
+        self.channel = RealChannel(gaussian(1 / params.SNR))
         self.observer = Observer(self)
         self.controller = Controller(self)
         self.encoder = TrivialEncoder(self)
