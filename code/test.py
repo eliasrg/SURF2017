@@ -15,7 +15,6 @@ for SNR in [2, 4]:
     params = Parameters(
             T = T,
             alpha = 2,
-            P1 = 1, # Same as W
             W = 1, V = 1, SNR = SNR, SDR0 = SNR,
             Q = 1, R = 1, F = 1,
             KC = 1, KS = 1)

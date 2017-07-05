@@ -18,7 +18,7 @@ class Simulation:
         # x_est_r[t1, t2]: receiver estimate of x(t1) at time t2
         self.globals.x_est_r = dict()
 
-        self.plant = Plant(params.alpha, gaussian(params.P1),
+        self.plant = Plant(params.alpha, gaussian(params.W),
                 gaussian(params.W), gaussian(params.V))
         self.channel = Channel(gaussian(1 / params.SNR))
         self.observer = Observer(self)
@@ -53,14 +53,13 @@ class Simulation:
 
 
 class Parameters:
-    def __init__(self, T, alpha, P1, W, V, SNR, SDR0, Q, R, F, KC, KS):
+    def __init__(self, T, alpha, W, V, SNR, SDR0, Q, R, F, KC, KS):
         self.T = T # Time horizon
         self.alpha = alpha # System coefficient
         assert(alpha > 1) # unstable
 
         # Variance (noise power) parameters
-        self.P1 = P1 # V[x_1]
-        self.W = W # V[w_t]
+        self.W = W # V[w_t] = V[x_1]
         self.V = V # V[v_t]
         self.SNR = SNR # 1 / V[n_t]
         self.SDR0 = SDR0 # Channel code signal-distortion ratio, 1 / V[neff_t]
@@ -79,7 +78,7 @@ class Parameters:
             self.L(t)
 
     def all(self):
-        names = ['T', 'alpha', 'P1', 'W', 'V', 'SNR', 'SDR0', 'Q', 'R', 'F', 'KC', 'KS']
+        names = ['T', 'alpha', 'W', 'V', 'SNR', 'SDR0', 'Q', 'R', 'F', 'KC', 'KS']
         return {name: self.__dict__[name] for name in names}
 
     # Statically known parameters computed recursively using memoization
@@ -87,7 +86,7 @@ class Parameters:
     @memoized
     def Pt(self, t, t_obs):
         if (t, t_obs) == (1, 0):
-            return self.P1
+            return self.W
         elif t_obs == t:
             return self.Kt(t) * self.V
         elif t_obs == t-1:
@@ -104,7 +103,7 @@ class Parameters:
     @memoized
     def Pr(self, t, t_obs):
         if (t, t_obs) == (1, 0):
-            return self.P1
+            return self.W
         elif t_obs == t:
             return ((self.Pr(t, t-1) + self.SDR0 * self.Pt(t, t))
                     / (1 + self.SDR0))
