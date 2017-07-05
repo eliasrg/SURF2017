@@ -6,6 +6,7 @@ from utilities import memoized
 
 from types import SimpleNamespace
 import numpy as np
+import inspect
 
 class Simulation:
     def __init__(self, params):
@@ -78,8 +79,7 @@ class Parameters:
             self.L(t)
 
     def all(self):
-        names = ['T', 'alpha', 'W', 'V', 'SNR', 'SDR0', 'Q', 'R', 'F', 'KC', 'KS']
-        return {name: self.__dict__[name] for name in names}
+        return {k: v for k, v in inspect.getmembers(self) if not k.startswith('__')}
 
     # Statically known parameters computed recursively using memoization
 
