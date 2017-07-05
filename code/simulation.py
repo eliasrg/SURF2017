@@ -79,7 +79,7 @@ class Parameters:
             self.L(t)
 
     def all(self):
-        names = ['T', 'alpha', 'P1', 'W', 'V', 'SNR', 'Q', 'R', 'F', 'KC', 'KS']
+        names = ['T', 'alpha', 'P1', 'W', 'V', 'SNR', 'SDR0', 'Q', 'R', 'F', 'KC', 'KS']
         return {name: self.__dict__[name] for name in names}
 
     # Statically known parameters computed recursively using memoization
