@@ -32,6 +32,13 @@ class RealChannel:
     def average_power(self):
         return self.total_power / self.uses
 
+class BitChannel:
+    """Transmits integers noiselessly."""
+    def transmit(self, msg):
+        """msg is a sequence of integers."""
+        assert(all(isinstance(x, int)) for x in msg)
+        return msg
+
 
 class LQGCost:
     """A cost function of the form
