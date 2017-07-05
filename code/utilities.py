@@ -1,4 +1,6 @@
 def memoized(f):
+    """Returns a version of f that remembers which arguments it has been called
+    with and stores them in a table to avoid recomputing values."""
     table = dict()
 
     def memo_f(*args):

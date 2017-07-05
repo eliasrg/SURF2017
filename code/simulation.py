@@ -133,18 +133,20 @@ class Parameters:
     @memoized
     def S_inf(self):
         return next(filter(lambda S: S > 0,
-                np.polynomial.polynomial.Polynomial(list(reversed([
-                    1,
+                np.polynomial.polynomial.Polynomial([
+                    -self.Q * self.R,
                     -(self.Q + (self.alpha**2 - 1) * self.R),
-                    -self.Q * self.R]))).roots()))
+                    1
+                    ]).roots()))
 
     @memoized
     def Pt_inf(self):
         return next(filter(lambda S: S > 0,
-                np.polynomial.polynomial.Polynomial(list(reversed([
-                    1,
+                np.polynomial.polynomial.Polynomial([
+                    -self.V * self.W,
                     -((self.alpha**2 - 1) * self.V + self.W),
-                    -self.V * self.W]))).roots()))
+                    1
+                    ]).roots()))
 
     @memoized
     def Pt_inf_bar(self):

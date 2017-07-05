@@ -10,5 +10,6 @@ def onepoint(x) -> Sampler:
 zero = onepoint(0)
 
 def gaussian(var: float) -> Sampler:
+    """Returns a Gaussian PDF with variance var."""
     stddev = sqrt(var)
     return lambda: np.random.normal(0, stddev)
