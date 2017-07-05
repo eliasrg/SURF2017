@@ -8,10 +8,10 @@ setrecursionlimit(1 << 20)
 
 
 n_runs = 1 << 8
-T = 1 << 10
+T = 1 << 9
 
 LQG_average_trajectories = []
-for SNR in [4]:
+for SNR in [2, 4]:
     params = Parameters(
             T = T,
             alpha = 2,
@@ -32,6 +32,8 @@ for SNR in [4]:
     LQG_slices = list(zip(*LQG_trajectories))
     LQG_average_trajectory = np.array(list(map(np.mean, LQG_slices)))
     LQG_average_trajectories.append(LQG_average_trajectory)
+
+print("Average power over channel: {:.4f}".format(sim.channel.average_power()))
 
 def plot():
     for LQG_average_trajectory in LQG_average_trajectories:

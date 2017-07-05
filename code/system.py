@@ -17,9 +17,18 @@ class Plant:
 class Channel:
     def __init__(self, draw_n):
         self.draw_n = draw_n
+        self.total_power = 0
+        self.uses = 0
 
-    def transmit(self, a):
-        return a + self.draw_n()
+    def transmit(self, msg):
+        for a in msg:
+            self.total_power += a**2
+        self.uses += 1
+
+        return (a + self.draw_n() for a in msg)
+
+    def average_power(self):
+        return self.total_power / self.uses
 
 
 class LQGCost:

@@ -36,7 +36,7 @@ class Simulation:
             # The encoder encodes the message
             code = self.encoder.encode(*msg)
             # The encoded message is sent over the channel
-            code_recv = [self.channel.transmit(p) for p in code]
+            code_recv = self.channel.transmit(code)
             # The decoder decodes the encoded message
             msg_recv = self.decoder.decode(*code_recv)
             # The controller receives the message and generates a control signal
