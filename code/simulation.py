@@ -79,7 +79,8 @@ class Parameters:
             self.L(t)
 
     def all(self):
-        return {k: v for k, v in inspect.getmembers(self) if not k.startswith('__')}
+        return {k: v for k, v in inspect.getmembers(self)
+                if not k.startswith('__')}
 
     # Statically known parameters computed recursively using memoization
 
