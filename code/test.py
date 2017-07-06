@@ -46,7 +46,7 @@ def plot():
         plt.plot(range(0, T + 1), 10 * np.log10(LQG_average_trajectory))
 
     plt.plot((1, T),
-            10 * np.log10(params.LQR_inf_lower_bound()) * np.ones(2), 'r-')
+            10 * np.log10(params.LQR_inf_lower_bound()) * np.ones(2), 'r--')
 
     plt.ylim(0, 50)
     plt.grid()
