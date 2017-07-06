@@ -63,4 +63,4 @@ class LloydMax:
             levels = boundaries_to_levels(boundaries)
             boundaries = levels_to_boundaries(levels)
 
-        return (boundaries, levels)
+        return levels, boundaries
