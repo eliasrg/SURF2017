@@ -51,7 +51,7 @@ class LloydMax:
         def boundaries_to_levels(boundaries):
             return [
                     quad(lambda x: x * distr.pdf(x), lo, hi)[0]
-                  / quad(distr.pdf, lo, hi)[0]
+                  / (distr.cdf(hi) - distr.cdf(lo))
                 for lo, hi in zip(boundaries, boundaries[1:])]
 
         def levels_to_boundaries(levels):
