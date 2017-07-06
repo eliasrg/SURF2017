@@ -1,4 +1,4 @@
-from distributions import onepoint, zero, gaussian
+from distributions import gaussian
 from system import Plant, RealChannel, LQGCost
 from control import TrivialObserver, TrivialController, Observer, Controller
 from coding import TrivialEncoder, TrivialDecoder

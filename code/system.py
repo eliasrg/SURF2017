@@ -1,23 +1,23 @@
 class Plant:
     """The system {x(t+1) = a x(t) + w(t) + u(t); y(t) = x(t) + v(t)}."""
-    def __init__(self, alpha, draw_x1, draw_w, draw_v):
+    def __init__(self, alpha, x1_distr, w_distr, v_distr):
         self.alpha = alpha
-        self.draw_x1 = draw_x1
-        self.draw_w = draw_w
-        self.draw_v = draw_v
+        self.x1_distr = x1_distr
+        self.w_distr = w_distr
+        self.v_distr = v_distr
 
-        self.x = draw_x1()
-        self.y = self.x + self.draw_v()
+        self.x = x1_distr.rvs()
+        self.y = self.x + self.v_distr.rvs()
 
     def step(self, u):
-        self.x = self.alpha * self.x + self.draw_w() + u
-        self.y = self.x + self.draw_v()
+        self.x = self.alpha * self.x + self.w_distr.rvs() + u
+        self.y = self.x + self.v_distr.rvs()
 
 
 class RealChannel:
     """Transmits real numbers with additive noise."""
-    def __init__(self, draw_n):
-        self.draw_n = draw_n
+    def __init__(self, n_distr):
+        self.n_distr = n_distr
         self.total_power = 0
         self.uses = 0
 
@@ -27,7 +27,7 @@ class RealChannel:
             self.total_power += a**2
         self.uses += 1
 
-        return (a + self.draw_n() for a in msg)
+        return (a + self.n_distr.rvs() for a in msg)
 
     def average_power(self):
         return self.total_power / self.uses
