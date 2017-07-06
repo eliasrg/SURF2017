@@ -10,29 +10,31 @@ n_runs = 1 << 6
 T = 1 << 9
 
 LQG_average_trajectories = []
-for SNR in [2, 4]:
-    print("SNR = {}".format(SNR))
-    params = Parameters(
-            T = T,
-            alpha = 2,
-            W = 1, V = 1, SNR = SNR, SDR0 = SNR,
-            Q = 1, R = 1, F = 1,
-            KC = 1, KS = 1)
+def simulate():
+    global params, sim, LQG_average_trajectories
+    for SNR in [2, 4]:
+        print("SNR = {}".format(SNR))
+        params = Parameters(
+                T = T,
+                alpha = 2,
+                W = 1, V = 1, SNR = SNR, SDR0 = SNR,
+                Q = 1, R = 1, F = 1,
+                KC = 1, KS = 1)
 
-    LQG_trajectories = []
-    for i in range(n_runs):
-        sim = Simulation(params)
-        LQG_trajectory = tuple(sim.LQG.evaluate(t)
-                               for t in sim.simulate(T))
-        LQG_trajectories.append(LQG_trajectory)
+        LQG_trajectories = []
+        for i in range(n_runs):
+            sim = Simulation(params)
+            LQG_trajectory = tuple(sim.LQG.evaluate(t)
+                                   for t in sim.simulate(T))
+            LQG_trajectories.append(LQG_trajectory)
 
-    LQG_slices = list(zip(*LQG_trajectories))
-    LQG_average_trajectory = np.array(list(map(np.mean, LQG_slices)))
-    LQG_average_trajectories.append(LQG_average_trajectory)
-    print("  Average power over channel: {:.4f}".format(
-        sim.channel.average_power()))
+        LQG_slices = list(zip(*LQG_trajectories))
+        LQG_average_trajectory = np.array(list(map(np.mean, LQG_slices)))
+        LQG_average_trajectories.append(LQG_average_trajectory)
+        print("  Average power over channel: {:.4f}".format(
+            sim.channel.average_power()))
 
-globals().update(params.all()) # Bring parameters into scope
+    globals().update(params.all()) # Bring parameters into scope
 
 def plot():
     plt.figure()
