@@ -1,10 +1,12 @@
 import numpy as np
+import scipy.stats as st
 import matplotlib.pyplot as plt
 
 from simulation import Simulation, Parameters
+from coding import LloydMax
 
 
-n_runs = 1 << 8
+n_runs = 1 << 6
 T = 1 << 9
 
 LQG_average_trajectories = []
@@ -33,6 +35,8 @@ for SNR in [2, 4]:
 globals().update(params.all()) # Bring parameters into scope
 
 def plot():
+    plt.figure()
+
     for LQG_average_trajectory in LQG_average_trajectories:
         # Plot in dB
         plt.xlabel("Time [steps]")
@@ -44,4 +48,16 @@ def plot():
 
     plt.ylim(0, 50)
     plt.grid()
+    plt.show(block=False)
+
+
+def plot_lloyd_max(n_levels):
+    plt.figure()
+    distr = st.norm
+    boundaries, levels = LloydMax.generate_intervals(n_levels, distr)
+    plt.scatter(levels, np.zeros(len(levels)), color='red')
+    plt.scatter(boundaries, np.zeros(len(boundaries)),
+            color='purple', s=3)
+    x = np.linspace(-4, 4)
+    plt.plot(x, distr.pdf(x))
     plt.show(block=False)
