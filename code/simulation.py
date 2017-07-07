@@ -1,7 +1,7 @@
 from distributions import gaussian
 from system import Plant, RealChannel, LQGCost
-from joint.control import TrivialObserver, TrivialController, Observer, Controller
-from coding import TrivialEncoder, TrivialDecoder
+import joint.control
+import trivial.coding
 from utilities import memoized
 
 from types import SimpleNamespace
@@ -22,10 +22,10 @@ class Simulation:
         self.plant = Plant(params.alpha, gaussian(params.W),
                 gaussian(params.W), gaussian(params.V))
         self.channel = RealChannel(gaussian(1 / params.SNR))
-        self.observer = Observer(self)
-        self.controller = Controller(self)
-        self.encoder = TrivialEncoder(self)
-        self.decoder = TrivialDecoder(self)
+        self.observer = joint.control.Observer(self)
+        self.controller = joint.control.Controller(self)
+        self.encoder = trivial.coding.Encoder(self)
+        self.decoder = trivial.coding.Decoder(self)
 
         self.LQG = LQGCost(self.plant, params.Q, params.R, params.F)
 
