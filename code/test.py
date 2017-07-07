@@ -3,7 +3,7 @@ import scipy.stats as st
 import matplotlib.pyplot as plt
 
 from simulation import Simulation, Parameters
-from coding import LloydMax
+import separate.coding.lloyd_max as lm
 
 
 n_runs = 1 << 6
@@ -56,7 +56,7 @@ def plot():
 def plot_lloyd_max(n_levels):
     plt.figure()
     distr = st.norm
-    levels, boundaries = LloydMax.generate_intervals(n_levels, distr)
+    levels, boundaries = lm.generate_intervals(n_levels, distr)
     plt.scatter(levels, np.zeros(len(levels)), color='red')
     plt.scatter(boundaries, np.zeros(len(boundaries)),
             color='purple', s=3)
