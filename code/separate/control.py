@@ -37,14 +37,12 @@ class MutualState:
         noise_fx = w_distr.pdf(noise_x)
 
         # Extra x space of 2σ_w on both sides
+        next_lo = next_x_without_noise[0] - 2 * w_distr.std()
+        next_hi = next_x_without_noise[-1] + 2 * w_distr.std()
         extra_x_below = np.array(sorted(np.arange(
-                next_x_without_noise[0] - spacing,
-                next_x_without_noise[0] - 2 * w_distr.std(),
-                -spacing)))
+                next_x_without_noise[0] - spacing, next_lo, -spacing)))
         extra_x_above = np.arange(
-                next_x_without_noise[-1] + spacing,
-                next_x_without_noise[-1] + 2 * w_distr.std(),
-                spacing)
+                next_x_without_noise[-1] + spacing, next_hi, spacing)
         next_x = np.concatenate((
             extra_x_below, next_x_without_noise, extra_x_above))
         next_fx_without_noise = np.concatenate((
@@ -61,7 +59,7 @@ class MutualState:
                 kind='linear', bounds_error=False, fill_value=0)
 
         # Construct the new distribution
-        self.distr = stats.rv_continuous()
+        self.distr = stats.rv_continuous(a=next_lo, b=next_hi)
         self.distr._pdf = pdf
 
         # DEBUG: For inspecting the local variables interactively
