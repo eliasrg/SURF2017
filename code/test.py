@@ -1,13 +1,14 @@
 import numpy as np
 import scipy.stats as st
 import matplotlib.pyplot as plt
+from scipy.integrate import quad
 
 from simulation import Simulation, Parameters
 import separate.coding.lloyd_max as lm
 
 
 n_runs = 1 << 6
-T = 1 << 9
+T = 1 << 5
 
 LQG_average_trajectories = []
 def simulate():
@@ -53,13 +54,24 @@ def plot():
     plt.show(block=False)
 
 
-def plot_lloyd_max(n_levels):
+def plot_lloyd_max(distr, enc, dec):
     plt.figure()
-    distr = st.norm
-    enc, dec = lm.generate(n_levels, distr)
     plt.scatter(dec.levels, np.zeros(len(dec.levels)), color='red')
     plt.scatter(enc.boundaries, np.zeros(len(enc.boundaries)),
             color='purple', s=3)
     x = np.linspace(-4, 4)
     plt.plot(x, distr.pdf(x))
     plt.show(block=False)
+
+def generate_plot_lloyd_max(n_levels):
+    distr = st.norm
+    enc, dec = lm.generate(n_levels, distr)
+    plot_lloyd_max(distr, enc, dec)
+
+def test_update(i=4):
+    global ms, ctrl
+    import separate.control as ctrl
+    ms = ctrl.MutualState(sim, 10)
+    plot_lloyd_max(ms.distr, ms.encoder, ms.decoder)
+    ms.update(i, debug_globals=globals())
+    plot_lloyd_max(ms.distr, ms.encoder, ms.decoder)
