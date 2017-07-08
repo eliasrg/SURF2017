@@ -24,7 +24,7 @@ class Decoder:
         return self.levels[i]
 
 
-def generate_intervals(n_levels, distr):
+def generate(n_levels, distr):
     # Initialize the boundaries (TODO: can be done more efficiently)
     # Start with the same total probability 1/n_levels in each interval
     boundaries = distr.ppf(np.linspace(0, 1, n_levels + 1))
@@ -44,4 +44,4 @@ def generate_intervals(n_levels, distr):
         levels = boundaries_to_levels(boundaries)
         boundaries = levels_to_boundaries(levels)
 
-    return levels, boundaries
+    return Encoder(boundaries), Decoder(levels)

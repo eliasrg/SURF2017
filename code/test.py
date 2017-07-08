@@ -56,9 +56,9 @@ def plot():
 def plot_lloyd_max(n_levels):
     plt.figure()
     distr = st.norm
-    levels, boundaries = lm.generate_intervals(n_levels, distr)
-    plt.scatter(levels, np.zeros(len(levels)), color='red')
-    plt.scatter(boundaries, np.zeros(len(boundaries)),
+    enc, dec = lm.generate(n_levels, distr)
+    plt.scatter(dec.levels, np.zeros(len(dec.levels)), color='red')
+    plt.scatter(enc.boundaries, np.zeros(len(enc.boundaries)),
             color='purple', s=3)
     x = np.linspace(-4, 4)
     plt.plot(x, distr.pdf(x))
