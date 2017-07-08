@@ -15,13 +15,17 @@ class Encoder:
 
 
 class Decoder:
-    def __init__(self, levels):
+    def __init__(self, levels, boundaries):
         self.levels = levels
+        self.boundaries = boundaries
 
     def decode(self, *msg):
         assert(len(msg) == 1) # One integer
         i = msg[0]
         return self.levels[i]
+
+    def get_interval(self, i):
+        return self.boundaries[i], self.boundaries[i + 1]
 
 
 def generate(n_levels, distr):
@@ -44,4 +48,4 @@ def generate(n_levels, distr):
         levels = boundaries_to_levels(boundaries)
         boundaries = levels_to_boundaries(levels)
 
-    return Encoder(boundaries), Decoder(levels)
+    return Encoder(boundaries), Decoder(levels, boundaries)
