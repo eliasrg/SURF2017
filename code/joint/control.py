@@ -1,7 +1,7 @@
 from math import sqrt
 
 class Observer:
-    """The observer/transmitter described in the paper."""
+    """The observer/transmitter described in the JSCC paper."""
     def __init__(self, sim):
         self.sim = sim
 
@@ -26,7 +26,7 @@ class Observer:
 
 
 class Controller:
-    """The controller/receiver described in the paper."""
+    """The controller/receiver described in the JSCC paper."""
     def __init__(self, sim):
         self.sim = sim
 
