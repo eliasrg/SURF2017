@@ -7,6 +7,9 @@ from scipy.interpolate import interp1d
 from scipy.signal import convolve
 import scipy.stats as stats
 
+# Integral subdivision limit
+LIMIT = 10
+
 class MutualState:
     """State known to both the observer and the controller."""
     def __init__(self, sim, n_levels):
@@ -20,7 +23,7 @@ class MutualState:
         # Cut and discretize
         lo, hi = self.decoder.get_interval(i)
         # Note: Using CDF in this case would be slightly _less_ efficient
-        gamma, _ = quad(self.distr.pdf, lo, hi) # (below (11))
+        gamma, _ = quad(self.distr.pdf, lo, hi, limit=LIMIT) # (below (11))
         N_SAMPLES = 50
         x = np.linspace(lo, hi, num=N_SAMPLES)
         fx = self.distr.pdf(x) / gamma # (11)

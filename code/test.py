@@ -59,7 +59,7 @@ def plot_lloyd_max(distr, enc, dec):
     plt.scatter(dec.levels, np.zeros(len(dec.levels)), color='red')
     plt.scatter(enc.boundaries, np.zeros(len(enc.boundaries)),
             color='purple', s=3)
-    x = np.linspace(-4, 4)
+    x = np.linspace(-4, 4, num=1000)
     plt.plot(x, distr.pdf(x))
     plt.show(block=False)
 

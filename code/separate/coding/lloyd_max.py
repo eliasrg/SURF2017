@@ -3,6 +3,9 @@ from utilities import int_binsearch
 import numpy as np
 from scipy.integrate import quad
 
+# Integral subdivision limit
+LIMIT = 10
+
 class Encoder:
     def __init__(self, boundaries):
         self.boundaries = boundaries
@@ -35,8 +38,8 @@ def generate(n_levels, distr):
 
     def boundaries_to_levels(boundaries):
         return [
-                quad(lambda x: x * distr.pdf(x), lo, hi)[0]
-              / quad(distr.pdf, lo, hi)[0]
+                quad(lambda x: x * distr.pdf(x), lo, hi, limit=LIMIT)[0]
+              / quad(distr.pdf, lo, hi, limit=LIMIT)[0]
             for lo, hi in zip(boundaries, boundaries[1:])]
 
     def levels_to_boundaries(levels):
