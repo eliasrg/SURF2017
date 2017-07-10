@@ -3,6 +3,10 @@ from utilities import int_binsearch
 import numpy as np
 from scipy.integrate import quad
 
+# Debug
+from sys import stderr
+from numpy import linalg as LA
+
 # Integral subdivision limit
 LIMIT = 10
 
@@ -47,8 +51,11 @@ def generate(n_levels, distr):
               + [(a + b) / 2 for a, b in zip(levels, levels[1:])]
               + [float('inf')])
 
-    for _ in range(10): # TODO more sensible termination condition
+    for _ in range(5): # TODO more sensible termination condition
+        prev_boundaries = boundaries
         levels = boundaries_to_levels(boundaries)
         boundaries = levels_to_boundaries(levels)
+        print(LA.norm(np.array(boundaries[1:-1])
+            - np.array(prev_boundaries[1:-1])), file=stderr)
 
     return Encoder(boundaries), Decoder(levels, boundaries)
