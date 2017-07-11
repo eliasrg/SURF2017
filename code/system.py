@@ -32,10 +32,15 @@ class RealChannel:
     def average_power(self):
         return self.total_power / self.uses
 
-class BitChannel:
-    """Transmits integers noiselessly."""
+class IntegerChannel:
+    """Noiseless fixed-rate digital channel.
+    Transmits integers in the range [0, 2^R - 1]."""
+    def __init__(self, n_symbols):
+        self.n_symbols = n_symbols # 2^R where R is the (fixed) rate
+
     def transmit(self, msg):
-        """msg is a sequence of integers."""
+        """msg is an array/list of integers no longer than 2^R."""
+        assert(len(msg) <= n_symbols)
         assert(all(isinstance(x, int)) for x in msg)
         return msg
 
