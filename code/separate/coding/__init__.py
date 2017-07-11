@@ -19,11 +19,12 @@ class MutualState:
         self.n_levels = n_levels
 
         self.distr = gaussian(sim.params.W)
-        self.encoder, self.decoder = lloyd_max.generate(n_levels, self.distr)
+        self.lm_encoder, self.lm_decoder = \
+            lloyd_max.generate(n_levels, self.distr)
 
     def update(self, i, debug_globals=dict()):
         # Cut and discretize
-        lo, hi = self.decoder.get_interval(i)
+        lo, hi = self.lm_decoder.get_interval(i)
         # Note: Using CDF in this case would be slightly _less_ efficient
         gamma, _ = quad(self.distr.pdf, lo, hi, limit=LIMIT) # (below (11))
         N_SAMPLES = 50
@@ -32,7 +33,7 @@ class MutualState:
 
         # Predict without noise
         alpha = self.sim.params.alpha
-        x_hat = self.decoder.decode(i)
+        x_hat = self.lm_decoder.decode(i)
         next_x_without_noise = alpha * (x - x_hat) # also linearly spaced!
         spacing = next_x_without_noise[1] - next_x_without_noise[0]
 
@@ -71,5 +72,5 @@ class MutualState:
         debug_globals.update(locals())
 
         # Generate the next Lloyd-Max quantizer
-        self.encoder, self.decoder = lloyd_max.generate(
+        self.lm_encoder, self.lm_decoder = lloyd_max.generate(
                 self.n_levels, self.distr)
