@@ -11,6 +11,35 @@ import scipy.stats as stats
 LIMIT = 10
 
 
+class Encoder:
+    def __init__(self, sim, mutual_state):
+        self.sim = sim
+        self.mutual_state = mutual_state
+
+    def encode(self, *msg):
+        # Just encode it with Lloyd-Max
+        # (pass it to channel encoder or digital channel)
+        return self.mutual_state.lm_encoder.encode(*msg)
+
+
+class Decoder:
+    def __init__(self, sim, mutual_state):
+        self.sim = sim
+        self.mutual_state = mutual_state
+
+    def decode(self, *msg):
+        # Decode with the Lloyd-Max decoder
+        # (receive from channel encoder or digital channel)
+        x_est = self.mutual_state.lm_decoder.decode(*msg)
+
+        # Update the distribution tracker
+        assert(len(msg) == 1) # One integer
+        i = msg[0]
+        self.mutual_state.update(i)
+
+        return x_est
+
+
 class MutualState:
     """State known to both the encoder and the decoder (would be computed at
     both ends in practice, but here it is just computed once to save time)."""

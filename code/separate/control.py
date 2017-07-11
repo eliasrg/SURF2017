@@ -4,7 +4,8 @@ class Observer:
         self.sim = sim
 
     def observe(self, t, y):
-        pass # TODO
+        # Pass to the (source) encoder
+        return (y,)
 
 
 class Controller:
@@ -15,4 +16,11 @@ class Controller:
     def control(self, t, *msg):
         sim = self.sim
 
-        pass # TODO
+        # Decode the state estimate
+        assert(len(msg) == 1) # One real number
+        x_est = msg[0]
+
+        # Generate the control signal
+        u = -sim.params.L(t) * self.x_est
+
+        return u
