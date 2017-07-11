@@ -70,8 +70,8 @@ def generate_plot_lloyd_max(n_levels):
 
 def test_update(i=4):
     global ms, ctrl
-    import separate.control as ctrl
-    ms = ctrl.MutualState(sim, 10)
+    import separate.coding as cdng
+    ms = cdng.MutualState(sim, 10)
     plot_lloyd_max(ms.distr, ms.encoder, ms.decoder)
     ms.update(i, debug_globals=globals())
     plot_lloyd_max(ms.distr, ms.encoder, ms.decoder)
