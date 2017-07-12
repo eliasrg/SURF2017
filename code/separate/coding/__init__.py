@@ -19,7 +19,7 @@ class Encoder:
     def encode(self, *msg):
         # Just encode it with Lloyd-Max
         # (pass it to channel encoder or digital channel)
-        return self.mutual_state.lm_encoder.encode(*msg)
+        return (self.mutual_state.lm_encoder.encode(*msg),)
 
 
 class Decoder:
