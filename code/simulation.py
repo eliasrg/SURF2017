@@ -1,6 +1,8 @@
 from distributions import gaussian
-from system import Plant, RealChannel, LQGCost
+from system import Plant, RealChannel, IntegerChannel, LQGCost
 import joint.control
+import separate.control
+import separate.coding
 import trivial.coding
 from utilities import memoized
 
@@ -12,22 +14,43 @@ class Simulation:
     def __init__(self, params):
         self.params = params
 
-        # Globally known data
-        self.globals = SimpleNamespace()
-        # u[t]: control signal at time t
-        self.globals.u = dict()
-        # x_est_r[t1, t2]: receiver estimate of x(t1) at time t2
-        self.globals.x_est_r = dict()
-
         self.plant = Plant(params.alpha, gaussian(params.W),
                 gaussian(params.W), gaussian(params.V))
-        self.channel = RealChannel(gaussian(1 / params.SNR))
-        self.observer = joint.control.Observer(self)
-        self.controller = joint.control.Controller(self)
-        self.encoder = trivial.coding.Encoder(self)
-        self.decoder = trivial.coding.Decoder(self)
-
         self.LQG = LQGCost(self.plant, params.Q, params.R, params.F)
+
+        if params.analog:
+            # Globally known data
+            self.globals = SimpleNamespace()
+            # u[t]: control signal at time t
+            self.globals.u = dict()
+            # x_est_r[t1, t2]: receiver estimate of x(t1) at time t2
+            self.globals.x_est_r = dict()
+
+            self.channel = RealChannel(gaussian(1 / params.SNR))
+        else:
+            self.channel = IntegerChannel(params.n_codewords)
+
+
+        if params.scheme == 'joint':
+            self.observer = joint.control.Observer(self)
+            self.controller = joint.control.Controller(self)
+            if (params.KC, params.KS) == (1, 1):
+                self.encoder = trivial.coding.Encoder(self)
+                self.decoder = trivial.coding.Decoder(self)
+            elif (params.KC, params.KS) == (2, 1):
+                pass # TODO Spiral encoder/decoder
+
+        elif params.scheme == 'separate':
+            pass # TODO Tree codes
+
+        elif params.scheme == 'lloyd-max':
+            self.observer = separate.control.Observer(self)
+            self.controller = separate.control.Controller(self)
+
+            self.mutual_state = \
+                    separate.coding.MutualState(self, params.n_codewords)
+            self.encoder = separate.coding.Encoder(self, self.mutual_state)
+            self.decoder = separate.coding.Decoder(self, self.mutual_state)
 
     def simulate(self, T):
         t = 1
@@ -54,29 +77,60 @@ class Simulation:
 
 
 class Parameters:
-    def __init__(self, T, alpha, W, V, SNR, SDR0, Q, R, F, KC, KS):
+    def __init__(self, T, alpha, W, V, Q, R, F):
         self.T = T # Time horizon
         self.alpha = alpha # System coefficient
         assert(alpha > 1) # unstable
 
-        # Variance (noise power) parameters
+        # System noise power (variance) parameters
         self.W = W # V[w_t] = V[x_1]
         self.V = V # V[v_t]
-        self.SNR = SNR # 1 / V[n_t]
-        self.SDR0 = SDR0 # Channel code signal-distortion ratio, 1 / V[neff_t]
 
         # LQG parameters
         self.Q = Q
         self.R = R
         self.F = F
 
-        # Channel usage parameters
-        self.KC = KC
-        self.KS = KS
-
         # Pre-evaluate L(t) in the right order to avoid blowing the stack
         for t in range(self.T, 0, -1):
             self.L(t)
+
+    def setRates(self, KC, KS):
+        if (KC, KS) not in [(1, 1), (2, 1)]:
+            raise ValueError("{{KC = {}; KS = {}}} unsupported".format(KC, KS))
+        else:
+            self.KC = KC
+            self.KS = KS
+
+    def setAnalog(self, SNR):
+        self.SNR = SNR # 1 / V[n_t]
+        self.analog = True
+
+    def setDigital(self, n_codewords):
+        self.n_codewords = n_codewords
+        self.analog = False
+
+    def setScheme(self, scheme):
+        self.scheme = scheme
+        if scheme == 'joint':
+            assert(self.analog)
+            if (self.KC, self.KS) == (1, 1):
+                # Channel code signal-distortion ratio, 1 / V[neff_t]
+                self.SDR0 = self.SNR # Optimum is achieved
+            elif (self.KC, self.KS) == (2, 1):
+                raise NotImplementedError("Spiral not implemented yet")
+
+        elif scheme == 'separate':
+            assert(self.analog)
+            raise NotImplementedError("Tree codes not implemented yet")
+
+        elif scheme == 'lloyd-max':
+            assert(not self.analog)
+            pass # Nothing to do
+
+        else:
+            raise ValueError("Unrecognized scheme: {}".format(scheme))
+
 
     def all(self):
         return {k: v for k, v in inspect.getmembers(self)
