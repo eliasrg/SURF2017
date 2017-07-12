@@ -40,7 +40,7 @@ class IntegerChannel:
 
     def transmit(self, msg):
         """msg is an array/list of integers no longer than 2^R."""
-        assert(len(msg) <= n_symbols)
+        assert(len(msg) <= self.n_symbols)
         assert(all(isinstance(x, int)) for x in msg)
         return msg
 
