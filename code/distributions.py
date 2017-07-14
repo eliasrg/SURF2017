@@ -1,10 +1,13 @@
-from numpy import sqrt
+from utilities import memoized
+
+import numpy as np
+from scipy.integrate import quad
 from scipy.interpolate import interp1d
 import scipy.stats as stats
 
 def gaussian(var):
     """Returns a Gaussian PDF with variance var."""
-    stddev = sqrt(var)
+    stddev = np.sqrt(var)
     return stats.norm(0, stddev)
 
 
@@ -18,3 +21,12 @@ class Custom(stats.rv_continuous):
         self.fx = x
         self._pdf = interp1d(x, fx,
                 kind='linear', bounds_error=False, fill_value=0)
+
+    @memoized
+    def mean(self):
+        return quad(lambda x: x * self.pdf(x), self.a, self.b)[0]
+
+    @memoized
+    def std(self):
+        mean = self.mean()
+        return quad(lambda x: (x - mean)**2 * self.pdf(x), self.a, self.b)[0]
