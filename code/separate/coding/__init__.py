@@ -1,9 +1,8 @@
-from distributions import gaussian
+from distributions import gaussian, Custom
 from . import lloyd_max
 
 import numpy as np
 from scipy.integrate import quad
-from scipy.interpolate import interp1d
 from scipy.signal import convolve
 import scipy.stats as stats
 
@@ -57,7 +56,7 @@ class MutualState:
         # Note: Using CDF in this case would be slightly _less_ efficient
         gamma, _ = quad(self.distr.pdf, lo, hi, limit=LIMIT) # (below (11))
         N_SAMPLES = 50
-        x = np.linspace(lo, hi, num=N_SAMPLES)
+        x = np.linspace(lo, hi, num=N_SAMPLES) # TODO linspace(-∞, b)... :/
         fx = self.distr.pdf(x) / gamma # (11)
 
         # Predict without noise
@@ -89,13 +88,8 @@ class MutualState:
         next_fx = spacing * convolve(next_fx_without_noise, noise_fx,
                 mode='same', method='auto')
 
-        # Interpolate the new PDF
-        pdf = interp1d(next_x, next_fx,
-                kind='linear', bounds_error=False, fill_value=0)
-
-        # Construct the new distribution
-        self.distr = stats.rv_continuous(a=next_lo, b=next_hi)
-        self.distr._pdf = pdf
+        # Interpolate the new PDF and construct the new distribution
+        self.distr = Custom(next_x, next_fx)
 
         # DEBUG: For inspecting the local variables interactively
         debug_globals.update(locals())
