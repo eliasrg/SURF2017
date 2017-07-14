@@ -2,7 +2,7 @@ from distributions import gaussian, Custom
 from . import lloyd_max
 
 import numpy as np
-from scipy.integrate import quad
+from scipy.integrate import quad, trapz
 from scipy.signal import convolve
 import scipy.stats as stats
 
@@ -89,6 +89,9 @@ class MutualState:
         # Convolve (automatically chooses direct or FFT method)
         next_fx = spacing * convolve(next_fx_without_noise, noise_fx,
                 mode='same', method='auto')
+
+        # Normalize to compensate for cut-off
+        next_fx /= trapz(next_fx, next_x)
 
         # Interpolate the new PDF and construct the new distribution
         self.distr = Custom(next_x, next_fx)
