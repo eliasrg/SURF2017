@@ -53,10 +53,12 @@ class MutualState:
     def update(self, i, debug_globals=dict()):
         # Cut and discretize
         lo, hi = self.lm_decoder.get_interval(i)
+        if lo == -np.inf: lo = hi - 3 * self.distr.std()
+        if hi == +np.inf: hi = lo + 3 * self.distr.std()
         # Note: Using CDF in this case would be slightly _less_ efficient
         gamma, _ = quad(self.distr.pdf, lo, hi, limit=LIMIT) # (below (11))
         N_SAMPLES = 50
-        x = np.linspace(lo, hi, num=N_SAMPLES) # TODO linspace(-∞, b)... :/
+        x = np.linspace(lo, hi, num=N_SAMPLES)
         fx = self.distr.pdf(x) / gamma # (11)
 
         # Predict without noise

@@ -21,10 +21,10 @@ def simulate():
                 W = 1, V = 1,
                 Q = 1, R = 1, F = 1)
         params.setRates(KC = 1, KS = 1)
-        params.setAnalog(SNR)
-        params.setScheme('joint')
-        # params.setDigital(n_codewords = 2)
-        # params.setScheme('lloyd-max')
+        # params.setAnalog(SNR)
+        # params.setScheme('joint')
+        params.setDigital(n_codewords = 2)
+        params.setScheme('lloyd-max')
 
         LQG_trajectories = []
         for i in range(n_runs):
