@@ -36,7 +36,7 @@ class Decoder:
         i = msg[0]
         self.mutual_state.update(i)
 
-        return x_est
+        return (x_est,)
 
 
 class MutualState:

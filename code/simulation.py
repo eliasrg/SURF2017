@@ -65,7 +65,8 @@ class Simulation:
             msg_recv = self.decoder.decode(*code_recv)
             # The controller receives the message and generates a control signal
             u = self.controller.control(t, *msg_recv)
-            self.globals.u[t] = u
+            if self.params.analog:
+                self.globals.u[t] = u
 
             yield t
 
