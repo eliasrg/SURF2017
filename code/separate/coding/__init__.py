@@ -46,55 +46,66 @@ class MutualState:
         self.sim = sim
         self.n_levels = n_levels
 
-        self.distr = gaussian(sim.params.W)
+        self.distr = sim.plant.x1_distr
         self.lm_encoder, self.lm_decoder = \
             lloyd_max.generate(n_levels, self.distr)
 
+        # DEBUG
+        self.distrs = []
+
     def update(self, i, debug_globals=dict()):
-        # Cut and discretize
+        print("i = {}".format(i))
+        # Retrieve the interval and reproduction value
         lo, hi = self.lm_decoder.get_interval(i)
-        if lo == -np.inf: lo = hi - 3 * self.distr.std()
-        if hi == +np.inf: hi = lo + 3 * self.distr.std()
-        # Note: Using CDF in this case would be slightly _less_ efficient
-        gamma, _ = quad(self.distr.pdf, lo, hi, limit=LIMIT) # (below (11))
-        N_SAMPLES = 50
-        x = np.linspace(lo, hi, num=N_SAMPLES)
-        fx = self.distr.pdf(x) / gamma # (11)
+        x_est = self.lm_decoder.decode(i)
+        # (avoid infinite intervals)
+        if i == 0: lo = hi - 3 * self.distr.std()
+        if i == self.n_levels - 1: hi = lo + 3 * self.distr.std()
 
-        # Predict without noise
+        # Compute parameters
         alpha = self.sim.params.alpha
-        x_hat = self.lm_decoder.decode(i)
-        next_x_without_noise = alpha * (x - x_hat) # also linearly spaced!
-        spacing = next_x_without_noise[1] - next_x_without_noise[0]
+        gamma, _ = quad(self.distr.pdf, lo, hi)
+        mean, _ = quad(lambda x: x * self.distr.pdf(x) / gamma, lo, hi)
+        print("mean - x_est = {}".format(mean - x_est))
+        variance, _ = quad(lambda x: (x - x_est)**2 * self.distr.pdf(x) / gamma,
+                lo, hi)
+        std = np.sqrt(variance)
+        next_std = alpha**2 * std
 
-        # Introduce noise
+        # Discretize
+        N_SAMPLES = 1000
+        next_lo = -3 * next_std
+        next_hi =  3 * next_std
+        x = np.linspace(next_lo, next_hi, num=N_SAMPLES)
+        fx = np.where((lo <= x / alpha + x_est) * (x / alpha + x_est <= hi),
+                self.distr.pdf(x / alpha + x_est) / (alpha * gamma),
+                0)
+        spacing = x[1] - x[0]
+
+        # Noise
         w_distr = self.sim.plant.w_distr
-        noise_x = np.arange(-2 * w_distr.std(), 2 * w_distr.std(), spacing)
-        noise_fx = w_distr.pdf(noise_x)
+        w_x = np.arange(-2 * w_distr.std(), 2 * w_distr.std(), spacing)
+        w_fx = w_distr.pdf(w_x)
 
-        # Extra x space of 2σ_w on both sides
-        next_lo = next_x_without_noise[0] - 2 * w_distr.std()
-        next_hi = next_x_without_noise[-1] + 2 * w_distr.std()
-        extra_x_below = np.array(sorted(np.arange(
-                next_x_without_noise[0] - spacing, next_lo, -spacing)))
-        extra_x_above = np.arange(
-                next_x_without_noise[-1] + spacing, next_hi, spacing)
-        next_x = np.concatenate((
-            extra_x_below, next_x_without_noise, extra_x_above))
-        next_fx_without_noise = np.concatenate((
-            np.zeros(len(extra_x_below)),
-            fx / alpha,
-            np.zeros(len(extra_x_above))))
+        # DEBUG
+        self.x = x
+        self.fx = fx
+        self.w_x = w_x
+        self.w_fx = w_fx
 
-        # Convolve (automatically chooses direct or FFT method)
-        next_fx = spacing * convolve(next_fx_without_noise, noise_fx,
+        # Convolve
+        fx_with_noise = spacing * convolve(fx, w_fx,
                 mode='same', method='auto')
 
         # Normalize to compensate for cut-off
-        next_fx /= trapz(next_fx, next_x)
+        fx_with_noise /= trapz(fx_with_noise, x)
+
+        print("New mean: {}".format(trapz(x * fx_with_noise, x)))
+
 
         # Interpolate the new PDF and construct the new distribution
-        self.distr = Custom(next_x, next_fx)
+        self.distr = Custom(x, fx_with_noise)
+        self.distrs.append(self.distr) # DEBUG
 
         # DEBUG: For inspecting the local variables interactively
         debug_globals.update(locals())
