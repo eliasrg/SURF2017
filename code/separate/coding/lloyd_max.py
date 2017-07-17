@@ -2,13 +2,16 @@ from utilities import int_binsearch
 
 import numpy as np
 from scipy.integrate import quad
+from numpy import linalg as LA
 
 # Debug
 from sys import stderr
-from numpy import linalg as LA
 
 # Integral subdivision limit
 LIMIT = 10
+
+# Maximum number of iterations for the Lloyd-Max algorithm
+MAX_ITERATIONS = 20
 
 class Encoder:
     def __init__(self, boundaries):
@@ -51,11 +54,20 @@ def generate(n_levels, distr):
               + [(a + b) / 2 for a, b in zip(levels, levels[1:])]
               + [float('inf')])
 
-    for _ in range(5): # TODO more sensible termination condition
+    for i in range(MAX_ITERATIONS):
         prev_boundaries = boundaries
         levels = boundaries_to_levels(boundaries)
         boundaries = levels_to_boundaries(levels)
-        print(LA.norm(np.array(boundaries[1:-1])
-            - np.array(prev_boundaries[1:-1])), file=stderr)
+
+        # Normalized Euclidean distance between previous boundaries and
+        # next boundaries
+        dist = LA.norm(np.array(boundaries[1:-1]) \
+                - np.array(prev_boundaries[1:-1])) / np.sqrt(n_levels)
+        print("{}: {}".format(i, dist), file=stderr)
+        if dist < 0.001:
+            break
+    else:
+        raise RuntimeError("Lloyd-Max failed to converge after {} iterations."
+                .format(MAX_ITERATIONS))
 
     return Encoder(boundaries), Decoder(levels, boundaries)
