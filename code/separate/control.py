@@ -21,6 +21,7 @@ class Controller:
         x_est = msg[0]
 
         # Generate the control signal
-        u = -sim.params.L(t) * x_est
+        # u = -sim.params.L(t) * x_est
+        u = -sim.params.alpha * x_est
 
         return u
