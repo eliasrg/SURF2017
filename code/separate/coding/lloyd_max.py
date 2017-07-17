@@ -4,9 +4,6 @@ import numpy as np
 from scipy.integrate import quad
 from numpy import linalg as LA
 
-# Debug
-from sys import stderr
-
 # Integral subdivision limit
 LIMIT = 10
 
@@ -63,7 +60,6 @@ def generate(n_levels, distr):
         # next boundaries
         dist = LA.norm(np.array(boundaries[1:-1]) \
                 - np.array(prev_boundaries[1:-1])) / np.sqrt(n_levels)
-        print("{}: {}".format(i, dist), file=stderr)
         if dist < 0.001:
             break
     else:

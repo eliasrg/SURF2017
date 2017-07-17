@@ -54,7 +54,6 @@ class MutualState:
         self.distrs = []
 
     def update(self, i, debug_globals=dict()):
-        print("i = {}".format(i))
         # Retrieve the interval and reproduction value
         lo, hi = self.lm_decoder.get_interval(i)
         x_est = self.lm_decoder.decode(i)
@@ -66,7 +65,6 @@ class MutualState:
         alpha = self.sim.params.alpha
         gamma, _ = quad(self.distr.pdf, lo, hi)
         mean, _ = quad(lambda x: x * self.distr.pdf(x) / gamma, lo, hi)
-        print("mean - x_est = {}".format(mean - x_est))
         variance, _ = quad(lambda x: (x - x_est)**2 * self.distr.pdf(x) / gamma,
                 lo, hi)
         std = np.sqrt(variance)
@@ -99,8 +97,6 @@ class MutualState:
 
         # Normalize to compensate for cut-off
         fx_with_noise /= trapz(fx_with_noise, x)
-
-        print("New mean: {}".format(trapz(x * fx_with_noise, x)))
 
 
         # Interpolate the new PDF and construct the new distribution
