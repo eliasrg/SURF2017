@@ -18,7 +18,7 @@ class Custom(stats.rv_continuous):
         stats.rv_continuous.__init__(self, a=a, b=b)
 
         self.x = x
-        self.fx = x
+        self.fx = fx
         self._pdf = interp1d(x, fx,
                 kind='linear', bounds_error=False, fill_value=0)
 
@@ -29,4 +29,5 @@ class Custom(stats.rv_continuous):
     @memoized
     def std(self):
         mean = self.mean()
-        return quad(lambda x: (x - mean)**2 * self.pdf(x), self.a, self.b)[0]
+        return np.sqrt(quad(
+            lambda x: (x - mean)**2 * self.pdf(x), self.a, self.b)[0])
