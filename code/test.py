@@ -12,7 +12,7 @@ n_runs = 1 << 0
 T = 1 << 5
 
 LQG_average_trajectories = []
-def simulate():
+def simulate(plots=False):
     global params, sim, LQG_average_trajectories
     for SNR in [2]: # SNR irrelevant for an IntegerChannel
         print("SNR = {}".format(SNR))
@@ -33,16 +33,19 @@ def simulate():
             # LQG_trajectory = tuple(sim.LQG.evaluate(t)
             #                        for t in sim.simulate(T))
             LQG_trajectory = []
-            plot_lloyd_max(sim.mutual_state.distr,
-                    sim.mutual_state.lm_encoder,
-                    sim.mutual_state.lm_decoder, x_hit=sim.plant.x)
+            if plots and params.scheme == 'lloyd-max':
+                plot_lloyd_max(sim.mutual_state.distr,
+                        sim.mutual_state.lm_encoder,
+                        sim.mutual_state.lm_decoder, x_hit=sim.plant.x)
             try:
                 for t in sim.simulate(T):
+                    print("Run {:d}, t = {:d}".format(i, t))
                     LQG_trajectory.append(sim.LQG.evaluate(t))
-                    plot_lloyd_max_ms(sim.mutual_state.distr,
-                            sim.mutual_state.lm_encoder,
-                            sim.mutual_state.lm_decoder, sim.mutual_state,
-                            x_hit=sim.plant.x)
+                    if plots and params.scheme == 'lloyd-max':
+                        plot_lloyd_max_ms(sim.mutual_state.distr,
+                                sim.mutual_state.lm_encoder,
+                                sim.mutual_state.lm_decoder, sim.mutual_state,
+                                x_hit=sim.plant.x)
             except ValueError:
                 print("Divide by zero!")
             except KeyboardInterrupt:
@@ -74,7 +77,6 @@ def plot():
 
     plt.ylim(0, 50)
     plt.grid()
-    plt.show(block=False)
 
 
 def plot_lloyd_max(distr, enc, dec, x_hit=None):
@@ -93,7 +95,6 @@ def plot_lloyd_max(distr, enc, dec, x_hit=None):
     # plt.xlim(-20, 20)
     # plt.ylim(-0.05, 0.4)
     plt.axis('tight')
-    plt.show(block=False)
 
 def plot_lloyd_max_ms(distr, enc, dec, ms, x_hit=None):
     plt.figure()
@@ -113,7 +114,6 @@ def plot_lloyd_max_ms(distr, enc, dec, ms, x_hit=None):
     # plt.xlim(-20, 20)
     # plt.ylim(-0.05, 0.4)
     plt.axis('tight')
-    plt.show(block=False)
 
 def generate_plot_lloyd_max(n_levels):
     distr = st.norm
@@ -127,3 +127,9 @@ def test_update(i=4):
     plot_lloyd_max(ms.distr, ms.lm_encoder, ms.lm_decoder)
     ms.update(i, debug_globals=globals())
     plot_lloyd_max(ms.distr, ms.lm_encoder, ms.lm_decoder)
+
+def show(delay=0):
+    if delay != 0:
+        from time import sleep
+        sleep(delay)
+    plt.show(block=False)
