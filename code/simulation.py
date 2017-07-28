@@ -2,7 +2,7 @@ from distributions import gaussian
 from system import Plant, RealChannel, IntegerChannel, LQGCost
 import joint.control
 import separate.control
-import separate.coding
+import separate.coding.source
 import trivial.coding
 from utilities import memoized
 
@@ -48,9 +48,11 @@ class Simulation:
             self.controller = separate.control.Controller(self)
 
             self.mutual_state = \
-                    separate.coding.MutualState(self, params.n_codewords)
-            self.encoder = separate.coding.Encoder(self, self.mutual_state)
-            self.decoder = separate.coding.Decoder(self, self.mutual_state)
+                    separate.coding.source.MutualState(self, params.n_codewords)
+            self.encoder = \
+                    separate.coding.source.Encoder(self, self.mutual_state)
+            self.decoder = \
+                    separate.coding.source.Decoder(self, self.mutual_state)
 
     def simulate(self, T):
         t = 1

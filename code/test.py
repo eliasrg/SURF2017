@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from scipy.integrate import quad
 
 from simulation import Simulation, Parameters
-import separate.coding.lloyd_max as lm
+import separate.coding.source.lloyd_max as lm
 
 
 n_runs = 1 << 0
