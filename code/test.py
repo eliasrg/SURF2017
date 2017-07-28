@@ -6,6 +6,7 @@ from scipy.integrate import quad
 
 from simulation import Simulation, Parameters
 import separate.coding.source.lloyd_max as lm
+from separate.coding.channel.convolutional import ConvolutionalCode
 
 
 n_runs = 1 << 0
@@ -127,6 +128,22 @@ def test_update(i=4):
     plot_lloyd_max(ms.distr, ms.lm_encoder, ms.lm_decoder)
     ms.update(i, debug_globals=globals())
     plot_lloyd_max(ms.distr, ms.lm_encoder, ms.lm_decoder)
+
+def convolutional_test():
+    """Test of convolutional encoder (from a homework problem)."""
+    Gs = [
+        np.array([[1, 1, 1]]).transpose(),
+        np.array([[0, 0, 1]]).transpose(),
+        np.array([[0, 1, 0]]).transpose(),
+        np.array([[0, 1, 0]]).transpose(),
+        np.array([[0, 0, 1]]).transpose(),
+        np.array([[0, 1, 1]]).transpose()]
+    cc = ConvolutionalCode(3, 1, Gs)
+    msg = [np.array([[x]]) for x in [1,1,1,0,1,0,0,1,0,0,0,0,0]]
+    code = cc.encode_sequence(msg)
+    nominal_code = np.array([1,1,1, 1,1,0, 1,0,0, 0,0,1, 1,1,0, 0,0,1, 0,0,0,
+                             1,1,0, 0,0,0, 0,0,1, 0,1,0, 0,0,1, 0,1,1])
+    assert (np.array(code).flatten() == nominal_code).all()
 
 def show(delay=0):
     if delay != 0:
