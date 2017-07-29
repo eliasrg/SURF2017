@@ -1,3 +1,5 @@
+from scipy.stats import bernoulli
+
 class Plant:
     """The system {x(t+1) = a x(t) + w(t) + u(t); y(t) = x(t) + v(t)}."""
     def __init__(self, alpha, x1_distr, w_distr, v_distr):
@@ -46,6 +48,17 @@ class IntegerChannel:
 
     def average_power(self):
         return float('nan')
+
+class BinarySymmetricChannel:
+    """Flips each bit with probability p."""
+    def __init__(self, p):
+        self.p = p
+        self.noise_distr = bernoulli(p)
+
+    def transmit(self, msg):
+        """msg is an array/list of bits (integers that are 1 or 0)."""
+        assert(all(x in [0,1] for x in msg))
+        return (x ^ self.noise_distr.rvs() for x in msg)
 
 
 class LQGCost:
