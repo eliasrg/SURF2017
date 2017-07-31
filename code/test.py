@@ -6,7 +6,7 @@ from scipy.integrate import quad
 
 from simulation import Simulation, Parameters
 import separate.coding.source.lloyd_max as lm
-from separate.coding.channel.convolutional import ConvolutionalCode
+from separate.coding.channel.convolutional import ConvolutionalCode, Node
 
 
 n_runs = 1 << 0
@@ -144,6 +144,8 @@ def convolutional_test():
     nominal_code = np.array([1,1,1, 1,1,0, 1,0,0, 0,0,1, 1,1,0, 0,0,1, 0,0,0,
                              1,1,0, 0,0,0, 0,0,1, 0,1,0, 0,0,1, 0,1,1])
     assert (np.array(code).flatten() == nominal_code).all()
+
+    return cc, msg, nominal_code
 
 def show(delay=0):
     if delay != 0:
