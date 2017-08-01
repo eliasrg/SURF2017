@@ -125,3 +125,19 @@ class ViterbiDecoder:
         self.best_inputs = [node.input_history() for node in self.best_nodes]
 
         return best_node.input_history()
+
+
+class StackDecoder:
+    def __init__(self, code, p):
+        """Assumes binary symmetric channel with error probability p."""
+        self.code = code
+        self.p = p
+
+    def E0(self, rho):
+        # Compared with (3b) of the tree code paper, 1 = log 2 and the summation
+        # have been simplified away
+        p = self.p
+        return rho - (1 + rho) * np.log2(p**(1/(1+rho)) + (1 - p)**(1/(1+rho)))
+
+    def decode(self, recv):
+        pass
