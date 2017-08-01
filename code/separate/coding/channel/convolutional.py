@@ -88,3 +88,40 @@ class Node:
 def hamming_distance(a, b):
     """Computes the Hamming distance between two binary column vectors."""
     return np.abs(a - b).sum()
+
+
+class ViterbiDecoder:
+    """The Viterbi algorithm for maximum-likelihood decoding of a tree code
+    (i.e. convolutional code with infinite shift register). For such a code,
+    the algorithm simplifies to a naive exhaustive search with no dynamic
+    programming."""
+
+    def __init__(self, code):
+        self.code = code
+
+    def decode(self, received_sequence):
+        # Annotate each node with the Hamming distance (dist) between the
+        # received and predicted code sequences. Back
+        root = Node(self.code)
+        root.dist = 0
+        current_layer = [root]
+        for codeword in received_sequence:
+            next_layer = []
+            for node in current_layer:
+                children = list(node.extend())
+                for child in children:
+                    child.dist = node.dist + \
+                            hamming_distance(codeword, child.codeword)
+                next_layer += children
+            current_layer = next_layer
+
+        best_node = min(current_layer, key=lambda node: node.dist)
+
+        # Save additional results as fields of the object
+        self.best_hamming_distance = best_node.dist
+        self.final_layer = current_layer
+        self.best_nodes = [node for node in self.final_layer
+                if node.dist == self.best_hamming_distance]
+        self.best_inputs = [node.input_history() for node in self.best_nodes]
+
+        return best_node.input_history()
