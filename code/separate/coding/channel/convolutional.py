@@ -33,6 +33,7 @@ class Node:
     Instance variables:
     ∙ ConvolutionalCode code
     ∙ Node parent (or None)
+    ∙ depth ∊ ℕ
     and for all nodes except the root:
     ∙ input_block ∊ ℤ2^k
     ∙ codeword ∊ ℤ2^n"""
@@ -40,6 +41,8 @@ class Node:
     def __init__(self, code, parent=None, input_block=None):
         self.code = code
         self.parent = parent
+        self.depth = 0 if self.is_root() else self.parent.depth + 1
+
         if input_block is not None:
             assert not self.is_root()
             self.input_block = input_block
