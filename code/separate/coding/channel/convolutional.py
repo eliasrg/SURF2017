@@ -25,6 +25,9 @@ class ConvolutionalCode:
         data = list(data)
         return [self.encode(data[:i+1]) for i in range(len(data))]
 
+    def rate(self):
+        return self.k / self.n
+
 
 class Node:
     """A class of nodes for use in decoding algorithms.
