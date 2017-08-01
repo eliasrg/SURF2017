@@ -38,7 +38,7 @@ class Controller:
         sim = self.sim
 
         # Receive s_norm_est from decoder
-        assert(len(msg) == 1)
+        assert len(msg) == 1
         s_norm_est = msg[0]
 
         # Unnormalize (10a)

@@ -17,7 +17,7 @@ class Controller:
         sim = self.sim
 
         # Decode the state estimate
-        assert(len(msg) == 1) # One real number
+        assert len(msg) == 1 # One real number
         x_est = msg[0]
 
         # Generate the control signal

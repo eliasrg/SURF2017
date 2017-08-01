@@ -12,6 +12,6 @@ class Controller:
     signal to drive it to zero as quickly as possible without concern for the
     amplitude of the control signal."""
     def control(self, t, *msg):
-        assert(len(msg) == 1)
+        assert len(msg) == 1
         x_est = msg[0]
         return -self.sim.params.alpha * x_est

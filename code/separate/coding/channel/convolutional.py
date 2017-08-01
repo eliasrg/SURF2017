@@ -8,7 +8,7 @@ class ConvolutionalCode:
         self.n = n # Output block length
         self.k = k # Input block length
         self.Gs = Gs # Generator matrices G_1, ..., G_T ∊ ℤ2^(n×k)
-        assert(all(G.shape == (n,k) for G in Gs))
+        assert all(G.shape == (n,k) for G in Gs)
 
     def encode(self, data):
         """Performs one encoding step.

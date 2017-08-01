@@ -83,7 +83,7 @@ class Parameters:
     def __init__(self, T, alpha, W, V, Q, R, F):
         self.T = T # Time horizon
         self.alpha = alpha # System coefficient
-        assert(alpha > 1) # unstable
+        assert alpha > 1 # unstable
 
         # System noise power (variance) parameters
         self.W = W # V[w_t] = V[x_1]
@@ -116,7 +116,7 @@ class Parameters:
     def setScheme(self, scheme):
         self.scheme = scheme
         if scheme == 'joint':
-            assert(self.analog)
+            assert self.analog
             if (self.KC, self.KS) == (1, 1):
                 # Channel code signal-distortion ratio, 1 / V[neff_t]
                 self.SDR0 = self.SNR # Optimum is achieved
@@ -124,11 +124,11 @@ class Parameters:
                 raise NotImplementedError("Spiral not implemented yet")
 
         elif scheme == 'separate':
-            assert(self.analog)
+            assert self.analog
             raise NotImplementedError("Tree codes not implemented yet")
 
         elif scheme == 'lloyd-max':
-            assert(not self.analog)
+            assert not self.analog
             pass # Nothing to do
 
         else:

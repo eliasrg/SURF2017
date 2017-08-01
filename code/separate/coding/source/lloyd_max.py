@@ -15,7 +15,7 @@ class Encoder:
         self.boundaries = boundaries
 
     def encode(self, *msg):
-        assert(len(msg) == 1) # One real number
+        assert len(msg) == 1 # One real number
         x = msg[0]
         return int_binsearch(lambda i: self.boundaries[i] >= x,
                 0, len(self.boundaries)) - 1
@@ -27,7 +27,7 @@ class Decoder:
         self.boundaries = boundaries
 
     def decode(self, *msg):
-        assert(len(msg) == 1) # One integer
+        assert len(msg) == 1 # One integer
         i = msg[0]
         return self.levels[i]
 

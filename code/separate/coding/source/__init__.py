@@ -32,7 +32,7 @@ class Decoder:
         x_est = self.mutual_state.lm_decoder.decode(*msg)
 
         # Update the distribution tracker
-        assert(len(msg) == 1) # One integer
+        assert len(msg) == 1 # One integer
         i = msg[0]
         self.mutual_state.update(i)
 

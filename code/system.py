@@ -42,8 +42,8 @@ class IntegerChannel:
 
     def transmit(self, msg):
         """msg is an array/list of integers no longer than 2^R."""
-        assert(len(msg) <= self.n_symbols)
-        assert(all(isinstance(x, int)) for x in msg)
+        assert len(msg) <= self.n_symbols
+        assert all(isinstance(x, int) for x in msg)
         return msg
 
     def average_power(self):
@@ -57,7 +57,7 @@ class BinarySymmetricChannel:
 
     def transmit(self, msg):
         """msg is an array/list of bits (integers that are 1 or 0)."""
-        assert(all(x in [0,1] for x in msg))
+        assert all(x in [0,1] for x in msg)
         return (x ^ self.noise_distr.rvs() for x in msg)
 
 
