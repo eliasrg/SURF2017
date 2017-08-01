@@ -42,3 +42,7 @@ def to_column_vector(x):
 
 def full_rank(M):
     return matrix_rank(M) == min(M.shape)
+
+def hamming_distance(a, b):
+    """Computes the Hamming distance between two binary (column) vectors."""
+    return np.abs(a - b).sum()
