@@ -104,7 +104,8 @@ class ViterbiDecoder:
 
     def decode(self, received_sequence):
         # Annotate each node with the Hamming distance (dist) between the
-        # received and predicted code sequences. Back
+        # received and predicted code sequences. No extra fields are needed for
+        # backtracking because every node has only one parent
         root = Node(self.code)
         root.dist = 0
         current_layer = [root]
