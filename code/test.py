@@ -6,7 +6,8 @@ from scipy.integrate import quad
 
 from simulation import Simulation, Parameters
 import separate.coding.source.lloyd_max as lm
-from separate.coding.channel.convolutional import ConvolutionalCode, Node
+from separate.coding.channel.convolutional \
+        import ConvolutionalCode, Node, hamming_distance, ViterbiDecoder
 
 
 n_runs = 1 << 0
@@ -146,6 +147,27 @@ def convolutional_test():
     assert (np.array(code).flatten() == nominal_code).all()
 
     return cc, msg, nominal_code
+
+def viterbi_test():
+    """Test of the Viterbi algorithm (from a homework problem)."""
+    Gs = [
+        np.array([[1, 1]]).transpose(),
+        np.array([[0, 1]]).transpose(),
+        np.array([[1, 1]]).transpose()]
+    code = ConvolutionalCode(2, 1, Gs)
+    received_sequence = [np.array([x]).transpose() for x in
+            [[1,0], [1,1], [1,0], [1,1], [1,0], [1,1], [1,0]]]
+    decoder = ViterbiDecoder(code)
+    decoder.decode(received_sequence)
+    nominal_input = [np.array([[x]]) for x in [0, 1, 1, 1, 0, 0, 0]]
+
+    # In the homework problem, it was known that the last two bits were 0.
+    decoded_inputs = [history for history in map(list, decoder.best_inputs)
+            if history[-2:] == [np.array([[0]])] * 2]
+
+    assert decoder.best_hamming_distance == 3
+    assert decoded_inputs == [nominal_input]
+
 
 def show(delay=0):
     if delay != 0:
