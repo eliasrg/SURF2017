@@ -1,3 +1,6 @@
+import numpy as np
+from numpy.linalg import matrix_rank
+
 def memoized(f):
     """Returns a version of f that remembers which arguments it has been called
     with and stores them in a table to avoid recomputing values."""
@@ -32,3 +35,10 @@ def int_binsearch(p, lo, hi):
 #
 # I = int_binsearch(p, 0, len(X));
 # x = X[I];
+
+
+def to_column_vector(x):
+    return np.reshape(x, [-1, 1])
+
+def full_rank(M):
+    return matrix_rank(M) == min(M.shape)
