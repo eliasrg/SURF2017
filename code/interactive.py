@@ -130,64 +130,6 @@ def test_update(i=4):
     ms.update(i, debug_globals=globals())
     plot_lloyd_max(ms.distr, ms.lm_encoder, ms.lm_decoder)
 
-def convolutional_test():
-    """Test of convolutional encoder (from a homework problem)."""
-    Gs = [
-        np.array([[1, 1, 1]]).transpose(),
-        np.array([[0, 0, 1]]).transpose(),
-        np.array([[0, 1, 0]]).transpose(),
-        np.array([[0, 1, 0]]).transpose(),
-        np.array([[0, 0, 1]]).transpose(),
-        np.array([[0, 1, 1]]).transpose()]
-    cc = ConvolutionalCode(3, 1, Gs)
-    msg = [np.array([[x]]) for x in [1,1,1,0,1,0,0,1,0,0,0,0,0]]
-    code = cc.encode_sequence(msg)
-    nominal_code = np.array([1,1,1, 1,1,0, 1,0,0, 0,0,1, 1,1,0, 0,0,1, 0,0,0,
-                             1,1,0, 0,0,0, 0,0,1, 0,1,0, 0,0,1, 0,1,1])
-    assert (np.array(code).flatten() == nominal_code).all()
-
-    return cc, msg, nominal_code
-
-def viterbi_test():
-    """Test of the Viterbi algorithm (from a homework problem)."""
-    Gs = [
-        np.array([[1, 1]]).transpose(),
-        np.array([[0, 1]]).transpose(),
-        np.array([[1, 1]]).transpose()]
-    code = ConvolutionalCode(2, 1, Gs)
-    received_sequence = [np.array([x]).transpose() for x in
-            [[1,0], [1,1], [1,0], [1,1], [1,0], [1,1], [1,0]]]
-    decoder = ViterbiDecoder(code)
-    decoder.decode(received_sequence)
-    nominal_input = [np.array([[x]]) for x in [0, 1, 1, 1, 0, 0, 0]]
-
-    # In the homework problem, it was known that the last two bits were 0.
-    decoded_inputs = [history for history in map(list, decoder.best_inputs)
-            if history[-2:] == [np.array([[0]])] * 2]
-
-    assert all(node.depth == len(nominal_input) for node in decoder.best_nodes)
-    assert decoder.best_hamming_distance == 3
-    assert decoded_inputs == [nominal_input]
-
-    return code, received_sequence, decoded_inputs[0]
-
-def stack_test():
-    """Test of the Stack algorithm (from Viterbi and Omura, Figure 6.1)."""
-    Gs = [
-        np.array([[1, 1]]).transpose(),
-        np.array([[1, 0]]).transpose(),
-        np.array([[1, 1]]).transpose()]
-    code = ConvolutionalCode(2, 1, Gs)
-    received_sequence = [np.array([x]).transpose() for x in
-            [[0,1], [1,0], [0,1], [1,0], [1,1]]]
-    decoder = StackDecoder(code, 0.03)
-    decoded_input = list(decoder.decode(received_sequence))
-    nominal_input = [np.array([[x]]) for x in [1, 0, 1, 0, 0]]
-
-    assert decoded_input == nominal_input
-
-    return code, received_sequence, decoded_input
-
 
 def show(delay=0):
     if delay != 0:
