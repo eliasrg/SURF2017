@@ -123,9 +123,9 @@ def generate_plot_lloyd_max(n_levels):
     plot_lloyd_max(distr, enc, dec)
 
 def test_update(i=4):
-    global ms, ctrl
-    import separate.coding as cdng
-    ms = cdng.MutualState(sim, 10)
+    global ms
+    from separate.coding.source import MutualState
+    ms = MutualState(sim, 10)
     plot_lloyd_max(ms.distr, ms.lm_encoder, ms.lm_decoder)
     ms.update(i, debug_globals=globals())
     plot_lloyd_max(ms.distr, ms.lm_encoder, ms.lm_decoder)
