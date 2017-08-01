@@ -165,9 +165,11 @@ def viterbi_test():
     decoded_inputs = [history for history in map(list, decoder.best_inputs)
             if history[-2:] == [np.array([[0]])] * 2]
 
+    assert all(node.depth == len(nominal_input) for node in decoder.best_nodes)
     assert decoder.best_hamming_distance == 3
     assert decoded_inputs == [nominal_input]
 
+    return code, received_sequence, decoded_inputs[0]
 
 def show(delay=0):
     if delay != 0:
