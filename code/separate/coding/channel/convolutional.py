@@ -80,7 +80,7 @@ class Node:
             input_block = np.array([bits]).transpose()
 
             # Create a new node
-            node = Node(self.code, self, input_block)
+            node = self.__class__(self.code, self, input_block)
 
             # Calculate the expected output at the new node
             node.codeword = c ^ (self.code.Gs[0] @ input_block % 2)
