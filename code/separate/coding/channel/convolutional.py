@@ -83,3 +83,8 @@ class Node:
             node.codeword = c ^ (self.code.Gs[0] @ input_block % 2)
 
             yield node
+
+
+def hamming_distance(a, b):
+    """Computes the Hamming distance between two binary column vectors."""
+    return np.abs(a - b).sum()
