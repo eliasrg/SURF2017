@@ -6,8 +6,8 @@ from scipy.integrate import quad
 
 from simulation import Simulation, Parameters
 import separate.coding.source.lloyd_max as lm
-from separate.coding.channel.convolutional \
-        import ConvolutionalCode, Node, hamming_distance, ViterbiDecoder
+from separate.coding.channel.convolutional import ConvolutionalCode, Node, \
+        hamming_distance, ViterbiDecoder, StackDecoder
 
 
 n_runs = 1 << 0
@@ -170,6 +170,24 @@ def viterbi_test():
     assert decoded_inputs == [nominal_input]
 
     return code, received_sequence, decoded_inputs[0]
+
+def stack_test():
+    """Test of the Stack algorithm (from Viterbi and Omura, Figure 6.1)."""
+    Gs = [
+        np.array([[1, 1]]).transpose(),
+        np.array([[1, 0]]).transpose(),
+        np.array([[1, 1]]).transpose()]
+    code = ConvolutionalCode(2, 1, Gs)
+    received_sequence = [np.array([x]).transpose() for x in
+            [[0,1], [1,0], [0,1], [1,0], [1,1]]]
+    decoder = StackDecoder(code, 0.03)
+    decoded_input = list(decoder.decode(received_sequence))
+    nominal_input = [np.array([[x]]) for x in [1, 0, 1, 0, 0]]
+
+    assert decoded_input == nominal_input
+
+    return code, received_sequence, decoded_input
+
 
 def show(delay=0):
     if delay != 0:
