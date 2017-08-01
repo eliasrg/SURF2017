@@ -35,7 +35,7 @@ class Node:
     ∙ Node parent (or None)
     and for all nodes except the root:
     ∙ input_block ∊ ℤ2^k
-    ∙ code_block ∊ ℤ2^n"""
+    ∙ codeword ∊ ℤ2^n"""
 
     def __init__(self, code, parent=None, input_block=None):
         self.code = code
@@ -43,7 +43,7 @@ class Node:
         if input_block is not None:
             assert not self.is_root()
             self.input_block = input_block
-            # code_block is set by the call to parent.extend()
+            # codeword is set by the call to parent.extend()
 
     def is_root(self):
         return self.parent is None
@@ -80,6 +80,6 @@ class Node:
             node = Node(self.code, self, input_block)
 
             # Calculate the expected output at the new node
-            node.output_block = c ^ (self.code.Gs[0] @ input_block % 2)
+            node.codeword = c ^ (self.code.Gs[0] @ input_block % 2)
 
             yield node
