@@ -113,28 +113,38 @@ class CompareStackDecoders(unittest.TestCase):
     def test_random_code(self):
         n = 3
         k = 2
-        n_blocks = 6
+        n_blocks = 10
         p = 0.03
         bias_mode = 'E0'
         code = ConvolutionalCode.random_code(n, k, n_blocks - 1)
+
         input_sequence = stats.bernoulli.rvs(0.5, size = k * n_blocks)
         code_sequence = code.encode_sequence(blockify(input_sequence, k))
+        print("Encoded: {}".format(np.array(code_sequence).flatten()))
+        print("Input:   {}".format(input_sequence))
 
         decoded_own = np.array(list(
             StackDecoder(code, p, bias_mode=bias_mode)
             .decode(code_sequence))).flatten()
+        print("Decoded: {} ({})".format(decoded_own,
+            "success" if (decoded_own == input_sequence).all() else "failure"))
 
         _, decoded_anatoly, _ = anatoly.stack_dec(
-                to_column_vector(code_sequence),
+                np.matrix(to_column_vector(code_sequence)),
                 np.matrix(code.generator_matrix(n_blocks)),
                 k, n, n_blocks, p, bias=bias_mode)
 
-        print("Input:   {}".format(input_sequence))
-        print("Decoded: {}".format(decoded_own))
-        print("Anatoly: {}".format(np.array(decoded_anatoly).flatten()))
-        print("Encoded: {}".format(np.array(code_sequence).flatten()))
+        anatoly_success = \
+                (np.array(decoded_anatoly).flatten() == input_sequence).all()
+        print("Anatoly: {} ({})".format(np.array(decoded_anatoly).flatten(),
+            "success" if anatoly_success else "failure"))
 
-        self.assertTrue((decoded_own == np.array(decoded_anatoly).flatten()).all())
+        if not anatoly_success:
+            print("Diff:    {}".format(
+                np.array(decoded_anatoly).flatten() ^ input_sequence))
+
+        self.assertTrue(
+                (decoded_own == np.array(decoded_anatoly).flatten()).all())
 
 if __name__ == '__main__':
     unittest.main()
