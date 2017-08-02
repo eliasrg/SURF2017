@@ -55,6 +55,23 @@ class TestViterbiDecoder(unittest.TestCase):
         self.assertEqual(decoder.best_hamming_distance, 3)
         self.assertEqual(decoded_inputs, [self.nominal_input])
 
+    @staticmethod
+    def decode_long_code(n_blocks=10):
+        n = 3
+        k = 2
+        code = ConvolutionalCode.random_code(n, k, n_blocks - 1)
+
+        input_sequence = stats.bernoulli.rvs(0.5, size = k * n_blocks)
+        code_sequence = code.encode_sequence(blockify(input_sequence, k))
+        print("Encoded: {}".format(np.array(code_sequence).flatten()))
+        print("Input:   {}".format(input_sequence))
+
+        decoded = np.array(list(
+            ViterbiDecoder(code).decode(code_sequence))).flatten()
+
+        print("Decoded: {}".format(decoded))
+        print("Success!" if (decoded == input_sequence).all() else "Failure!")
+
 class TestStackDecoder(unittest.TestCase):
     """Test of the Stack algorithm (from Viterbi and Omura, Figure 6.1)."""
 
@@ -71,6 +88,26 @@ class TestStackDecoder(unittest.TestCase):
     def test_decode(self):
         decoded_input = list(self.decoder.decode(self.received_sequence))
         self.assertEqual(decoded_input, self.nominal_input)
+
+    @staticmethod
+    def decode_long_code(n_blocks=1000):
+        n = 3
+        k = 2
+        p = 0.03
+        bias_mode = 'E0'
+        code = ConvolutionalCode.random_code(n, k, n_blocks - 1)
+
+        input_sequence = stats.bernoulli.rvs(0.5, size = k * n_blocks)
+        code_sequence = code.encode_sequence(blockify(input_sequence, k))
+        print("Encoded: {}".format(np.array(code_sequence).flatten()))
+        print("Input:   {}".format(input_sequence))
+
+        decoded = np.array(list(
+            StackDecoder(code, p, bias_mode=bias_mode)
+            .decode(code_sequence))).flatten()
+
+        print("Decoded: {}".format(decoded))
+        print("Success!" if (decoded == input_sequence).all() else "Failure!")
 
 class CompareStackDecoders(unittest.TestCase):
     def test_random_code(self):
