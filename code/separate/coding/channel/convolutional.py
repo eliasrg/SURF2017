@@ -133,7 +133,7 @@ class ViterbiDecoder:
     def __init__(self, code):
         self.code = code
 
-    def decode(self, received_sequence):
+    def decode(self, received_sequence, save=False):
         # Annotate each node with the Hamming distance (dist) between the
         # received and predicted code sequences. No extra fields are needed for
         # backtracking because every node has only one parent
@@ -152,12 +152,13 @@ class ViterbiDecoder:
 
         best_node = min(current_layer, key=lambda node: node.dist)
 
-        # Save additional results as fields of the object
-        self.best_hamming_distance = best_node.dist
-        self.final_layer = current_layer
-        self.best_nodes = [node for node in self.final_layer
-                if node.dist == self.best_hamming_distance]
-        self.best_inputs = [node.input_history() for node in self.best_nodes]
+        if save:
+            # Save additional results as fields of the object
+            self.best_hamming_distance = best_node.dist
+            self.final_layer = current_layer
+            self.best_nodes = [node for node in self.final_layer
+                    if node.dist == self.best_hamming_distance]
+            self.best_inputs = [node.input_history() for node in self.best_nodes]
 
         return best_node.input_history()
 

@@ -45,7 +45,7 @@ class TestViterbiDecoder(unittest.TestCase):
 
     def test_decode(self):
         decoder = self.decoder
-        decoder.decode(self.received_sequence)
+        decoder.decode(self.received_sequence, save=True)
         # In the homework problem, it was known that the last two bits were 0.
         decoded_inputs = [history for history in map(list, decoder.best_inputs)
                 if history[-2:] == [np.array([[0]])] * 2]
