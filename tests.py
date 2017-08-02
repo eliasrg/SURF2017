@@ -8,6 +8,7 @@ import scipy.stats as stats
 from separate.coding.channel.convolutional \
         import ConvolutionalCode, NaiveMLDecoder, StackDecoder
 from utilities import blockify, to_column_vector
+from system import BinarySymmetricChannel
 
 import reference.tree_codes as anatoly
 
@@ -60,12 +61,16 @@ class TestNaiveMLDecoder(unittest.TestCase):
     def decode_long_code(n_blocks=10):
         n = 3
         k = 2
+        p = 0.03
         code = ConvolutionalCode.random_code(n, k, n_blocks - 1)
 
         input_sequence = stats.bernoulli.rvs(0.5, size = k * n_blocks)
         code_sequence = code.encode_sequence(blockify(input_sequence, k))
         print("Encoded: {}".format(np.array(code_sequence).flatten()))
         print("Input:   {}".format(input_sequence))
+
+        received_sequence = [list(BinarySymmetricChannel(p).transmit(c))
+                for c in code_sequence]
 
         decoded = np.array(list(
             NaiveMLDecoder(code).decode(code_sequence))).flatten()
@@ -103,9 +108,12 @@ class TestStackDecoder(unittest.TestCase):
         print("Encoded: {}".format(np.array(code_sequence).flatten()))
         print("Input:   {}".format(input_sequence))
 
+        received_sequence = [list(BinarySymmetricChannel(p).transmit(c))
+                for c in code_sequence]
+
         decoded = np.array(list(
             StackDecoder(code, p, bias_mode=bias_mode)
-            .decode(code_sequence))).flatten()
+            .decode(received_sequence))).flatten()
 
         print("Decoded: {}".format(decoded))
         print("Success!" if (decoded == input_sequence).all() else "Failure!")
@@ -124,14 +132,17 @@ class CompareStackDecoders(unittest.TestCase):
         print("Encoded: {}".format(np.array(code_sequence).flatten()))
         print("Input:   {}".format(input_sequence))
 
+        received_sequence = [list(BinarySymmetricChannel(p).transmit(c))
+                for c in code_sequence]
+
         decoded_own = np.array(list(
             StackDecoder(code, p, bias_mode=bias_mode)
-            .decode(code_sequence))).flatten()
+            .decode(received_sequence))).flatten()
         print("Decoded: {} ({})".format(decoded_own,
             "success" if (decoded_own == input_sequence).all() else "failure"))
 
         _, decoded_anatoly, _ = anatoly.stack_dec(
-                np.matrix(to_column_vector(code_sequence)),
+                np.matrix(to_column_vector(received_sequence)),
                 np.matrix(code.generator_matrix(n_blocks)),
                 k, n, n_blocks, p, bias=bias_mode)
 
