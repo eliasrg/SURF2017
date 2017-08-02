@@ -25,7 +25,7 @@ class ConvolutionalCode:
 
     def encode_sequence(self, data):
         """Encodes an entire sequence.
-    data is a list of column vectors in ℤ2^k."""
+    data is a sequence of column vectors in ℤ2^k."""
         data = list(data)
         return [self.encode(data[:i+1]) for i in range(len(data))]
 
