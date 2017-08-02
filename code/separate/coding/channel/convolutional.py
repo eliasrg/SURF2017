@@ -37,6 +37,16 @@ class ConvolutionalCode:
         # Assumes that the Gs[-1] is nonzero
         return len(self.Gs) - 1
 
+    def generator_matrix(self, n_blocks):
+        """The ((n n_blocks) × (k n_blocks)) generator matrix for the code."""
+        # Taken from A. Khina's code, modified to support n_blocks < len(Gs)
+        k, n = self.k, self.n
+        G = np.zeros([n * n_blocks, k * n_blocks])
+        for i, g in enumerate(self.Gs[:n_blocks]):
+            G[i*n:, :(n_blocks - i) * k] += np.kron(np.eye(n_blocks - i), g)
+
+        return G.astype(int)
+
 
 class Node:
     """A class of nodes for use in decoding algorithms.
