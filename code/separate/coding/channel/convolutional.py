@@ -32,6 +32,11 @@ class ConvolutionalCode:
     def rate(self):
         return self.k / self.n
 
+    def constraint_length(self):
+        """Returns the constraint length (maximum delay) of the code."""
+        # Assumes that the Gs[-1] is nonzero
+        return len(self.Gs) - 1
+
 
 class Node:
     """A class of nodes for use in decoding algorithms.
