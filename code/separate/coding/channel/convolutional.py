@@ -124,11 +124,10 @@ class Node:
             yield node
 
 
-class ViterbiDecoder:
-    """The Viterbi algorithm for maximum-likelihood decoding of a tree code
-    (i.e. convolutional code with infinite shift register). For such a code,
-    the algorithm simplifies to a naive exhaustive search with no dynamic
-    programming."""
+class NaiveMLDecoder:
+    """A naive exhaustive search for maximum-likelihood decoding of a
+    convolutional code. For a tree code (i.e. a convolutional code with infinite
+    shift register), the Viterbi algorithm simplifies to precisely this."""
 
     def __init__(self, code):
         self.code = code

@@ -7,7 +7,7 @@ from scipy.integrate import quad
 from simulation import Simulation, Parameters
 import separate.coding.source.lloyd_max as lm
 from separate.coding.channel.convolutional import ConvolutionalCode, Node, \
-        hamming_distance, ViterbiDecoder, StackDecoder
+        hamming_distance, NaiveMLDecoder, StackDecoder
 
 
 n_runs = 1 << 0

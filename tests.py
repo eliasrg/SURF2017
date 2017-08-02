@@ -6,7 +6,7 @@ import unittest
 import numpy as np
 import scipy.stats as stats
 from separate.coding.channel.convolutional \
-        import ConvolutionalCode, ViterbiDecoder, StackDecoder
+        import ConvolutionalCode, NaiveMLDecoder, StackDecoder
 from utilities import blockify, to_column_vector
 
 import reference.tree_codes as anatoly
@@ -30,8 +30,9 @@ class TestConvolutionalEncoder(unittest.TestCase):
         code = self.code.encode_sequence(self.msg)
         self.assertTrue((np.array(code).flatten() == self.nominal_code).all())
 
-class TestViterbiDecoder(unittest.TestCase):
-    """Test of the Viterbi algorithm (from a homework problem)."""
+class TestNaiveMLDecoder(unittest.TestCase):
+    """Test of ML decoding (from a homework problem on
+    the Viterbi algorithm)."""
 
     Gs = [
         np.array([[1, 1]]).transpose(),
@@ -40,7 +41,7 @@ class TestViterbiDecoder(unittest.TestCase):
     code = ConvolutionalCode(2, 1, Gs)
     received_sequence = [np.array([x]).transpose() for x in
             [[1,0], [1,1], [1,0], [1,1], [1,0], [1,1], [1,0]]]
-    decoder = ViterbiDecoder(code)
+    decoder = NaiveMLDecoder(code)
     nominal_input = [np.array([[x]]) for x in [0, 1, 1, 1, 0, 0, 0]]
 
     def test_decode(self):
@@ -67,7 +68,7 @@ class TestViterbiDecoder(unittest.TestCase):
         print("Input:   {}".format(input_sequence))
 
         decoded = np.array(list(
-            ViterbiDecoder(code).decode(code_sequence))).flatten()
+            NaiveMLDecoder(code).decode(code_sequence))).flatten()
 
         print("Decoded: {}".format(decoded))
         print("Success!" if (decoded == input_sequence).all() else "Failure!")
