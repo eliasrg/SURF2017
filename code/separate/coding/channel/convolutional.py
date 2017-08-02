@@ -1,7 +1,8 @@
-from utilities import hamming_distance
+from utilities import hamming_distance, full_rank
 
 import itertools as it
 import numpy as np
+import scipy.stats as stats
 from queue import PriorityQueue
 from numbers import Number
 
@@ -46,6 +47,19 @@ class ConvolutionalCode:
             G[i*n:, :(n_blocks - i) * k] += np.kron(np.eye(n_blocks - i), g)
 
         return G.astype(int)
+
+    @staticmethod
+    def random_code(n, k, constraint_length):
+        """Create a random code drawn from the LTI ensemble."""
+        random_matrix = lambda: stats.bernoulli.rvs(0.5, size=[n, k])
+
+        Gs = [random_matrix() for _ in range(constraint_length + 1)]
+
+        # Force G0 be a matrix of full rank
+        while not full_rank(Gs[0]):
+            Gs[0] = random_matrix()
+
+        return ConvolutionalCode(n, k, Gs)
 
 
 class Node:
