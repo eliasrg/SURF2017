@@ -111,11 +111,12 @@ class TestStackDecoder(unittest.TestCase):
         print("Success!" if (decoded == input_sequence).all() else "Failure!")
 
 class CompareStackDecoders(unittest.TestCase):
-    def test_random_code(self):
-        n = 3
-        k = 2
-        n_blocks = 10
-        p = 0.03
+    N_DEFAULT = 3
+    K_DEFAULT = 2
+
+    def test_random_code(self, n=N_DEFAULT, k=K_DEFAULT):
+        n_blocks = 17
+        p = 1e-10
         bias_mode = 'E0'
         code = ConvolutionalCode.random_code(n, k, n_blocks - 1)
 
@@ -146,6 +147,15 @@ class CompareStackDecoders(unittest.TestCase):
 
         self.assertTrue(
                 (decoded_own == np.array(decoded_anatoly).flatten()).all())
+
+
+    @staticmethod
+    def find_failure(n=N_DEFAULT, k=K_DEFAULT):
+        while True:
+            try:
+                CompareStackDecoders().test_random_code(n, k)
+            except AssertionError:
+                break
 
 if __name__ == '__main__':
     unittest.main()
