@@ -154,6 +154,7 @@ class CompareStackDecoders(unittest.TestCase):
         while True:
             try:
                 CompareStackDecoders().test_random_code(n, k)
+                print()
             except AssertionError:
                 break
 
