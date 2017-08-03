@@ -119,21 +119,25 @@ class TestStackDecoder(unittest.TestCase):
         print("Success!" if (decoded == input_sequence).all() else "Failure!")
 
 class CompareStackDecoders(unittest.TestCase):
-    def test_random_code(self):
-        n = 3
-        k = 2
-        n_blocks = 10
+    N_DEFAULT = 3
+    K_DEFAULT = 2
+
+    def test_random_code(self, n=N_DEFAULT, k=K_DEFAULT):
+        n_blocks = 17
         p = 0.03
         bias_mode = 'E0'
         code = ConvolutionalCode.random_code(n, k, n_blocks - 1)
 
         input_sequence = stats.bernoulli.rvs(0.5, size = k * n_blocks)
         code_sequence = code.encode_sequence(blockify(input_sequence, k))
-        print("Encoded: {}".format(np.array(code_sequence).flatten()))
-        print("Input:   {}".format(input_sequence))
 
         received_sequence = [list(BinarySymmetricChannel(p).transmit(c))
                 for c in code_sequence]
+        print("Encoded: {}".format(np.array(code_sequence).flatten()))
+        print("Receive: {}".format(np.array(received_sequence).flatten()))
+        print("Noise:   {}".format(np.array(received_sequence).flatten()
+            ^ np.array(code_sequence).flatten()))
+        print("Input:   {}".format(input_sequence))
 
         decoded_own = np.array(list(
             StackDecoder(code, p, bias_mode=bias_mode)
@@ -155,8 +159,19 @@ class CompareStackDecoders(unittest.TestCase):
             print("Diff:    {}".format(
                 np.array(decoded_anatoly).flatten() ^ input_sequence))
 
+        print()
+
         self.assertTrue(
                 (decoded_own == np.array(decoded_anatoly).flatten()).all())
+
+
+    @staticmethod
+    def find_failure(n=N_DEFAULT, k=K_DEFAULT):
+        while True:
+            try:
+                CompareStackDecoders().test_random_code(n, k)
+            except AssertionError:
+                break
 
 if __name__ == '__main__':
     unittest.main()
