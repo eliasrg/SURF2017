@@ -159,8 +159,6 @@ class CompareStackDecoders(unittest.TestCase):
             print("Diff:    {}".format(
                 np.array(decoded_anatoly).flatten() ^ input_sequence))
 
-        print()
-
         self.assertTrue(
                 (decoded_own == np.array(decoded_anatoly).flatten()).all())
 
@@ -170,6 +168,7 @@ class CompareStackDecoders(unittest.TestCase):
         while True:
             try:
                 CompareStackDecoders().test_random_code(n, k)
+                print()
             except AssertionError:
                 break
 
