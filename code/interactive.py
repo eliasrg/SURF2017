@@ -36,17 +36,17 @@ def simulate(plots=False):
             #                        for t in sim.simulate(T))
             LQG_trajectory = []
             if plots and params.scheme == 'lloyd-max':
-                plot_lloyd_max(sim.mutual_state.distr,
-                        sim.mutual_state.lm_encoder,
-                        sim.mutual_state.lm_decoder, x_hit=sim.plant.x)
+                plot_lloyd_max(sim.tracker.distr,
+                        sim.tracker.lm_encoder,
+                        sim.tracker.lm_decoder, x_hit=sim.plant.x)
             try:
                 for t in sim.simulate(T):
                     print("Run {:d}, t = {:d}".format(i, t))
                     LQG_trajectory.append(sim.LQG.evaluate(t))
                     if plots and params.scheme == 'lloyd-max':
-                        plot_lloyd_max_ms(sim.mutual_state.distr,
-                                sim.mutual_state.lm_encoder,
-                                sim.mutual_state.lm_decoder, sim.mutual_state,
+                        plot_lloyd_max_tracker(sim.tracker.distr,
+                                sim.tracker.lm_encoder,
+                                sim.tracker.lm_decoder, sim.tracker,
                                 x_hit=sim.plant.x)
             except ValueError:
                 print("Divide by zero!")
@@ -98,7 +98,7 @@ def plot_lloyd_max(distr, enc, dec, x_hit=None):
     # plt.ylim(-0.05, 0.4)
     plt.axis('tight')
 
-def plot_lloyd_max_ms(distr, enc, dec, ms, x_hit=None):
+def plot_lloyd_max_tracker(distr, enc, dec, tracker, x_hit=None):
     plt.figure()
     plt.scatter(dec.levels, np.zeros(len(dec.levels)), color='red')
     # plt.scatter(enc.boundaries, np.zeros(len(enc.boundaries)),
@@ -111,8 +111,8 @@ def plot_lloyd_max_ms(distr, enc, dec, ms, x_hit=None):
     b = min(distr.b, 20)
     x = np.linspace(a, b, num=10000)
     plt.plot(x, distr.pdf(x))
-    plt.plot(ms.x, ms.fx, color='orange')
-    plt.plot(ms.w_x, ms.w_fx, color='purple')
+    plt.plot(tracker.x, tracker.fx, color='orange')
+    plt.plot(tracker.w_x, tracker.w_fx, color='purple')
     # plt.xlim(-20, 20)
     # plt.ylim(-0.05, 0.4)
     plt.axis('tight')
@@ -123,12 +123,12 @@ def generate_plot_lloyd_max(n_levels):
     plot_lloyd_max(distr, enc, dec)
 
 def test_update(i=4):
-    global ms
-    from separate.coding.source import MutualState
-    ms = MutualState(sim, 10)
-    plot_lloyd_max(ms.distr, ms.lm_encoder, ms.lm_decoder)
-    ms.update(i, debug_globals=globals())
-    plot_lloyd_max(ms.distr, ms.lm_encoder, ms.lm_decoder)
+    global tracker
+    from separate.coding.source import DistributionTracker
+    tracker = DistributionTracker(sim, 10)
+    plot_lloyd_max(tracker.distr, tracker.lm_encoder, tracker.lm_decoder)
+    tracker.update(i, debug_globals=globals())
+    plot_lloyd_max(tracker.distr, tracker.lm_encoder, tracker.lm_decoder)
 
 
 def show(delay=0):

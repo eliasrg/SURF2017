@@ -47,12 +47,12 @@ class Simulation:
             self.observer = separate.control.Observer(self)
             self.controller = separate.control.Controller(self)
 
-            self.mutual_state = \
-                    separate.coding.source.MutualState(self, params.n_codewords)
+            self.tracker = separate.coding.source.DistributionTracker(
+                    self, params.n_codewords)
             self.encoder = \
-                    separate.coding.source.Encoder(self, self.mutual_state)
+                    separate.coding.source.Encoder(self, self.tracker)
             self.decoder = \
-                    separate.coding.source.Decoder(self, self.mutual_state)
+                    separate.coding.source.Decoder(self, self.tracker)
 
     def simulate(self, T):
         t = 1
