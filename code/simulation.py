@@ -47,12 +47,12 @@ class Simulation:
             self.observer = separate.control.Observer(self)
             self.controller = separate.control.Controller(self)
 
-            self.tracker = separate.coding.source.DistributionTracker(
-                    self, params.n_codewords)
-            self.encoder = \
-                    separate.coding.source.Encoder(self, self.tracker)
-            self.decoder = \
-                    separate.coding.source.Decoder(self, self.tracker)
+            self.encoder = separate.coding.source.Encoder(
+                    self, separate.coding.source.DistributionTracker(
+                        self, params.n_codewords))
+            self.decoder = separate.coding.source.Decoder(
+                    self, separate.coding.source.DistributionTracker(
+                        self, params.n_codewords))
 
     def simulate(self, T):
         t = 1

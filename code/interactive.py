@@ -36,18 +36,18 @@ def simulate(plots=False):
             #                        for t in sim.simulate(T))
             LQG_trajectory = []
             if plots and params.scheme == 'lloyd-max':
-                plot_lloyd_max(sim.tracker.distr,
-                        sim.tracker.lm_encoder,
-                        sim.tracker.lm_decoder, x_hit=sim.plant.x)
+                plot_lloyd_max(sim.encoder.tracker.distr,
+                        sim.encoder.tracker.lm_encoder,
+                        sim.encoder.tracker.lm_decoder, x_hit=sim.plant.x)
             try:
                 for t in sim.simulate(T):
                     print("Run {:d}, t = {:d}".format(i, t))
                     LQG_trajectory.append(sim.LQG.evaluate(t))
                     if plots and params.scheme == 'lloyd-max':
-                        plot_lloyd_max_tracker(sim.tracker.distr,
-                                sim.tracker.lm_encoder,
-                                sim.tracker.lm_decoder, sim.tracker,
-                                x_hit=sim.plant.x)
+                        plot_lloyd_max_tracker(sim.encoder.tracker.distr,
+                                sim.encoder.tracker.lm_encoder,
+                                sim.encoder.tracker.lm_decoder,
+                                sim.encoder.tracker, x_hit=sim.plant.x)
             except ValueError:
                 print("Divide by zero!")
             except KeyboardInterrupt:

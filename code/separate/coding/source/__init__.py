@@ -18,7 +18,9 @@ class Encoder:
     def encode(self, *msg):
         # Just encode it with Lloyd-Max
         # (pass it to channel encoder or digital channel)
-        return (self.tracker.lm_encoder.encode(*msg),)
+        i = self.tracker.lm_encoder.encode(*msg)
+        self.tracker.update(i)
+        return (i,)
 
 
 class Decoder:
