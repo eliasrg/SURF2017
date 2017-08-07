@@ -58,22 +58,27 @@ class TestNaiveMLDecoder(unittest.TestCase):
         self.assertEqual(decoded_inputs, [self.nominal_input])
 
     @staticmethod
-    def decode_long_code(n_blocks=10):
+    def decode_long_code(n_blocks=10, noise=False):
         n = 3
         k = 2
-        p = 0.03
+        if noise: p = 0.03
         code = ConvolutionalCode.random_code(n, k, n_blocks - 1)
 
         input_sequence = stats.bernoulli.rvs(0.5, size = k * n_blocks)
         code_sequence = code.encode_sequence(blockify(input_sequence, k))
+
+        channel = BinarySymmetricChannel(p if noise else 0)
+        received_sequence = [list(channel.transmit(c)) for c in code_sequence]
+
         print("Encoded: {}".format(np.array(code_sequence).flatten()))
+        if noise:
+            print("Receive: {}".format(np.array(received_sequence).flatten()))
+            print("Noise:   {}".format(np.array(received_sequence).flatten()
+                ^ np.array(code_sequence).flatten()))
         print("Input:   {}".format(input_sequence))
 
-        received_sequence = [list(BinarySymmetricChannel(p).transmit(c))
-                for c in code_sequence]
-
         decoded = np.array(list(
-            NaiveMLDecoder(code).decode(code_sequence))).flatten()
+            NaiveMLDecoder(code).decode(received_sequence))).flatten()
 
         print("Decoded: {}".format(decoded))
         print("Success!" if (decoded == input_sequence).all() else "Failure!")
@@ -96,20 +101,25 @@ class TestStackDecoder(unittest.TestCase):
         self.assertEqual(decoded_input, self.nominal_input)
 
     @staticmethod
-    def decode_long_code(n_blocks=1000):
+    def decode_long_code(n_blocks=1000, noise=False):
         n = 3
         k = 2
-        p = 0.03
+        p = 0.03 if noise else 1e-10
         bias_mode = 'E0'
         code = ConvolutionalCode.random_code(n, k, n_blocks - 1)
 
         input_sequence = stats.bernoulli.rvs(0.5, size = k * n_blocks)
         code_sequence = code.encode_sequence(blockify(input_sequence, k))
-        print("Encoded: {}".format(np.array(code_sequence).flatten()))
-        print("Input:   {}".format(input_sequence))
 
-        received_sequence = [list(BinarySymmetricChannel(p).transmit(c))
-                for c in code_sequence]
+        channel = BinarySymmetricChannel(p if noise else 0)
+        received_sequence = [list(channel.transmit(c)) for c in code_sequence]
+
+        print("Encoded: {}".format(np.array(code_sequence).flatten()))
+        if noise:
+            print("Receive: {}".format(np.array(received_sequence).flatten()))
+            print("Noise:   {}".format(np.array(received_sequence).flatten()
+                ^ np.array(code_sequence).flatten()))
+        print("Input:   {}".format(input_sequence))
 
         decoded = np.array(list(
             StackDecoder(code, p, bias_mode=bias_mode)
@@ -122,21 +132,23 @@ class CompareStackDecoders(unittest.TestCase):
     N_DEFAULT = 3
     K_DEFAULT = 2
 
-    def test_random_code(self, n=N_DEFAULT, k=K_DEFAULT):
+    def test_random_code(self, n=N_DEFAULT, k=K_DEFAULT, noise=False):
         n_blocks = 17
-        p = 0.03
+        p = 0.03 if noise else 1e-10
         bias_mode = 'E0'
         code = ConvolutionalCode.random_code(n, k, n_blocks - 1)
 
         input_sequence = stats.bernoulli.rvs(0.5, size = k * n_blocks)
         code_sequence = code.encode_sequence(blockify(input_sequence, k))
 
-        received_sequence = [list(BinarySymmetricChannel(p).transmit(c))
-                for c in code_sequence]
+        channel = BinarySymmetricChannel(p if noise else 0)
+        received_sequence = [list(channel.transmit(c)) for c in code_sequence]
+
         print("Encoded: {}".format(np.array(code_sequence).flatten()))
-        print("Receive: {}".format(np.array(received_sequence).flatten()))
-        print("Noise:   {}".format(np.array(received_sequence).flatten()
-            ^ np.array(code_sequence).flatten()))
+        if noise:
+            print("Receive: {}".format(np.array(received_sequence).flatten()))
+            print("Noise:   {}".format(np.array(received_sequence).flatten()
+                ^ np.array(code_sequence).flatten()))
         print("Input:   {}".format(input_sequence))
 
         decoded_own = np.array(list(
