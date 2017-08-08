@@ -43,16 +43,30 @@ class Decoder:
 
 class DistributionTracker:
     """Keeps track of the distribution of the plant's state."""
-    def __init__(self, sim, n_levels):
+    def __init__(self, sim, n_levels, distr=None,
+            lm_encoder=None, lm_decoder=None):
         self.sim = sim
         self.n_levels = n_levels
 
-        self.distr = sim.plant.x1_distr
-        self.lm_encoder, self.lm_decoder = \
-            lloyd_max.generate(n_levels, self.distr)
+        if distr is None:
+            assert lm_encoder is None and lm_decoder is None
+            self.distr = sim.plant.x1_distr
+            self.lm_encoder, self.lm_decoder = \
+                lloyd_max.generate(n_levels, self.distr)
+        else:
+            assert lm_encoder is not None and lm_decoder is not None
+            self.distr = distr
+            self.lm_encoder = lm_encoder
+            self.lm_decoder = lm_decoder
 
         # DEBUG
         self.distrs = []
+
+    def clone(self):
+        new = self.__class__(self.sim, self.n_levels, self.distr,
+                self.lm_encoder, self.lm_decoder)
+        new.distrs = self.distrs[:]
+        return new
 
     def update(self, i, debug_globals=dict()):
         # Retrieve the interval and reproduction value
