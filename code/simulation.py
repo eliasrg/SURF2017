@@ -1,7 +1,7 @@
 from distributions import gaussian
 from system import Plant, RealChannel, IntegerChannel, LQGCost
 import joint.control
-import separate.control
+import separate.control.lloyd_max
 import separate.coding.source
 import trivial.coding
 from utilities import memoized
@@ -44,8 +44,8 @@ class Simulation:
             pass # TODO Tree codes
 
         elif params.scheme == 'lloyd-max':
-            self.observer = separate.control.Observer(self)
-            self.controller = separate.control.Controller(self)
+            self.observer = separate.control.lloyd_max.Observer(self)
+            self.controller = separate.control.lloyd_max.Controller(self)
 
             self.encoder = separate.coding.source.Encoder(
                     self, separate.coding.source.DistributionTracker(
