@@ -64,6 +64,7 @@ class DistributionTracker:
 
         # Compute parameters
         alpha = self.sim.params.alpha
+        L = self.sim.params.L(self.sim.t)
         gamma, _ = quad(self.distr.pdf, lo, hi)
         mean, _ = quad(lambda x: x * self.distr.pdf(x) / gamma, lo, hi)
         variance, _ = quad(lambda x: (x - x_est)**2 * self.distr.pdf(x) / gamma,
@@ -76,8 +77,8 @@ class DistributionTracker:
         next_lo = -3 * next_std
         next_hi =  3 * next_std
         x = np.linspace(next_lo, next_hi, num=N_SAMPLES)
-        fx = np.where((lo <= x / alpha + x_est) * (x / alpha + x_est <= hi),
-                self.distr.pdf(x / alpha + x_est) / (alpha * gamma),
+        fx = np.where((lo <= (x + L * x_est) / alpha) * ((x + L * x_est) / alpha <= hi),
+                self.distr.pdf((x + L * x_est) / alpha) / (alpha * gamma),
                 0)
         spacing = x[1] - x[0]
 
