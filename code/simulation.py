@@ -55,10 +55,10 @@ class Simulation:
                         self, params.n_codewords))
 
     def simulate(self, T):
-        t = 1
-        while t <= T:
+        self.t = 1
+        while self.t <= T:
             # The observer observes the plant and generates a message
-            msg = self.observer.observe(t, self.plant.y)
+            msg = self.observer.observe(self.t, self.plant.y)
             # The encoder encodes the message
             code = self.encoder.encode(*msg)
             # The encoded message is sent over the channel
@@ -66,17 +66,17 @@ class Simulation:
             # The decoder decodes the encoded message
             msg_recv = self.decoder.decode(*code_recv)
             # The controller receives the message and generates a control signal
-            u = self.controller.control(t, *msg_recv)
+            u = self.controller.control(self.t, *msg_recv)
             if self.params.analog:
-                self.globals.u[t] = u
+                self.globals.u[self.t] = u
 
-            yield t
+            yield self.t
 
             self.plant.step(u)
             self.LQG.step(u)
 
-            t += 1
-        yield t
+            self.t += 1
+        yield self.t
 
 
 class Parameters:
