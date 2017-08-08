@@ -123,6 +123,22 @@ class Node:
 
             yield node
 
+    def first_common_ancestor(a, b):
+        # Let a be the deepest node
+        if a.depth < b.depth:
+            a, b = b, a
+
+        # Make sure a and b are at the same depth
+        while a.depth > b.depth:
+            a = a.parent
+
+        # Step upwards until a common ancestor is found
+        while a is not b:
+            a = a.parent
+            b = b.parent
+
+        return a
+
 
 class NaiveMLDecoder:
     """A naive exhaustive search for maximum-likelihood decoding of a
