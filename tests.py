@@ -5,7 +5,7 @@ sys.path.insert(0,
 import unittest
 import numpy as np
 import scipy.stats as stats
-from separate.coding.channel.convolutional \
+from separate.coding.convolutional \
         import ConvolutionalCode, NaiveMLDecoder, StackDecoder
 from utilities import blockify, to_column_vector
 from system import BinarySymmetricChannel
