@@ -51,8 +51,13 @@ class StackDecoder:
         # Run until we reach the first full-length path
         while True:
             node = self.nodes.get()
+
             if node.depth == len(received_sequence):
+                # Add it back to the queue so it can be extended in the future
+                self.nodes.put(node)
+
                 return node
+
             self.extend(node, received_sequence[node.depth])
 
     def decode(self, received_sequence):
