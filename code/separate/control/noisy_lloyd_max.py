@@ -3,8 +3,8 @@ class Observer:
     were noiseless and transmits it to the controller."""
     def __init__(self, sim):
         self.sim = sim
-        self.x_u_ideal = DeterministicPlant(sim.alpha)
-        self.x_u_actual = DeterministicPlant(sim.alpha)
+        self.x_u_ideal = DeterministicPlant(sim.params.alpha)
+        self.x_u_actual = DeterministicPlant(sim.params.alpha)
 
     def observe(self, t, y):
         # Update the controlled part of the actual plant
@@ -17,7 +17,7 @@ class Observer:
         x_est_ideal = x_est_uncontrolled + self.x_u_ideal.value
 
         # Update the controlled part of the ideal plant
-        u_ideal = -sim.params.L(t) * x_est_ideal
+        u_ideal = -self.sim.params.L(t) * x_est_ideal
         self.x_u_ideal.step(u_ideal)
 
         # Pass to the source and channel encoders
