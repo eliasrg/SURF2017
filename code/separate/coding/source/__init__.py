@@ -28,6 +28,9 @@ class Decoder:
         self.sim = sim
         self.tracker = tracker
 
+    def clone(self):
+        return self.__class__(self.sim, self.tracker.clone())
+
     def decode(self, *msg):
         # Decode with the Lloyd-Max decoder
         # (receive from channel encoder or digital channel)
