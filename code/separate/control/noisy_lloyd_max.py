@@ -33,15 +33,32 @@ class Controller:
         sim = self.sim
 
         # Decode the state estimate
-        assert len(msg) == 2 # One real number, one ??? to indicate mistake
-        x_est, mistake = msg
+        # One real number and None or a list to indicate mistake
+        assert len(msg) == 2
+        x_est, revised_x_est_history = msg
 
         # Generate the control signal
         u = -sim.params.L(t) * x_est
 
         # Correct for mistake
-        if mistake:
-            pass # TODO
+        if revised_x_est_history is not None:
+            x_correction = DeterministicPlant(sim.params.alpha)
+            n_revised_steps = len(revised_x_est_history)
+
+            print("Mistake: n_revised_steps = {}\nrevised_x_est_history = {}"
+                    .format(n_revised_steps, revised_x_est_history))
+
+            # First time where there is a difference between estimates
+            t1 = t - n_revised_steps
+
+            # Calculate the deviation -x_correction due to the mistake
+            for tau in range(t1, t):
+                u_actual = self.u_history[tau - 1] # Time starts at 1
+                x_corrected = revised_x_est_history[tau - t1]
+                u_corrected = -sim.params.L(tau) * x_corrected
+                x_correction.step(u_corrected - u_actual)
+
+            u += sim.params.alpha * x_correction.value
 
         return u
 
