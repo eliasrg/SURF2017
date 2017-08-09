@@ -1,3 +1,7 @@
+import sys, os
+sys.path.insert(0,
+        os.path.abspath(os.path.join(os.path.dirname(__file__), 'code')))
+
 from itertools import islice
 import numpy as np
 import scipy.stats as st
