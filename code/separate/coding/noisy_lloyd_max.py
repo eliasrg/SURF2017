@@ -11,7 +11,7 @@ class Encoder:
 
     def encode(self, *msg):
         # Quantize
-        i = self.source_encoder.encode(*msg)[i]
+        i = self.source_encoder.encode(*msg)[0]
 
         # Convert quantization index to bits
         # TODO Worth doing in multiple ways in the digital case?
@@ -40,13 +40,13 @@ class Decoder:
         self.received_codeword_history.append(received_codeword)
 
         # Decode using stack decoder
-        bits = self.stack_decoder.decode(self.received_codeword_history)
+        bits = self.stack_decoder.decode_block(self.received_codeword_history)
 
         # Convert to quantization index
         i = bits_to_int(bits)
 
         # Recover quantized estimate of x
-        x_est = self.source_decoder.decode(i)
+        x_est = self.source_decoder.decode(i)[0]
         self.source_decoder_history.append(self.source_decoder.clone())
 
         # TODO Check for mistake
