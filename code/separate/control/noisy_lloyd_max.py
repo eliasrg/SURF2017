@@ -24,6 +24,28 @@ class Observer:
         return (x_est_ideal,)
 
 
+class Controller:
+    def __init__(self, sim):
+        self.sim = sim
+        self.u_history = []
+
+    def control(self, t, *msg):
+        sim = self.sim
+
+        # Decode the state estimate
+        assert len(msg) == 2 # One real number, one ??? to indicate mistake
+        x_est, mistake = msg
+
+        # Generate the control signal
+        u = -sim.params.L(t) * x_est
+
+        # Correct for mistake
+        if mistake:
+            pass # TODO
+
+        return u
+
+
 class DeterministicPlant:
     """The deterministic plant x(0) = 0; x(t+1) = α x(t) + u(t)."""
     def __init__(self, alpha):
