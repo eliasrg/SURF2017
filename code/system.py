@@ -60,6 +60,9 @@ class BinarySymmetricChannel:
         assert all(x in [0,1] for x in msg)
         return (x ^ self.noise_distr.rvs() for x in msg)
 
+    def average_power(self):
+        return float('nan')
+
 
 class LQGCost:
     """A cost function of the form
