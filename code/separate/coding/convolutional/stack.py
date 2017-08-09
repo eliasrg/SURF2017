@@ -59,6 +59,10 @@ class StackDecoder:
         """Returns the decoded bit sequence."""
         return self.decode_node(received_sequence).input_history()
 
+    def decode_block(self, received_sequence):
+        """Returns the last block of the decoded bit sequence."""
+        return self.decode_node(received_sequence).input_block
+
     def E0(self, rho):
         # Compared with (3b) of the tree code paper, 1 = log 2 and the summation
         # have been simplified away
