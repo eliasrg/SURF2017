@@ -29,6 +29,9 @@ class StackDecoder:
         root.metric = 0
         self.nodes.put(root)
 
+        # The first node in each layer
+        self.first_nodes = [root]
+
     def extend(self, node, codeword):
         for child in node.extend():
             # Calculate the metric increment
@@ -53,6 +56,8 @@ class StackDecoder:
             node = self.nodes.get()
 
             if node.depth == len(received_sequence):
+                self.first_nodes.append(node)
+
                 # Add it back to the queue so it can be extended in the future
                 self.nodes.put(node)
 
