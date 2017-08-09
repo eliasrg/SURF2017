@@ -27,8 +27,11 @@ def simulate(plots=False):
         params.setRates(KC = 1, KS = 1)
         # params.setAnalog(SNR)
         # params.setScheme('joint')
-        params.setDigital(n_codewords = 2)
-        params.setScheme('lloyd-max')
+        # params.setDigital(quantizer_bits = 1)
+        # params.setScheme('lloyd-max')
+        params.setDigital(quantizer_bits = 1, p = 0.03)
+        params.setBlocklength(1)
+        params.setScheme('noisy-lloyd-max')
 
         LQG_trajectories = []
         for i in range(n_runs):
@@ -36,21 +39,24 @@ def simulate(plots=False):
             # LQG_trajectory = tuple(sim.LQG.evaluate(t)
             #                        for t in sim.simulate(T))
             LQG_trajectory = []
-            if plots and params.scheme == 'lloyd-max':
-                plot_lloyd_max(sim.encoder.tracker.distr,
-                        sim.encoder.tracker.lm_encoder,
-                        sim.encoder.tracker.lm_decoder, x_hit=sim.plant.x)
+            if plots:
+                tracker = (sim.encoder.tracker if params.scheme == 'lloyd-max'
+                        else sim.encoder.source_encoder.tracker)
+                plot_lloyd_max(tracker.distr,
+                        tracker.lm_encoder,
+                        tracker.lm_decoder, x_hit=sim.plant.x)
             try:
                 for t in sim.simulate(T):
                     print("Run {:d}, t = {:d}".format(i, t))
                     LQG_trajectory.append(sim.LQG.evaluate(t))
-                    if plots and params.scheme == 'lloyd-max':
-                        plot_lloyd_max_tracker(sim.encoder.tracker.distr,
-                                sim.encoder.tracker.lm_encoder,
-                                sim.encoder.tracker.lm_decoder,
-                                sim.encoder.tracker, x_hit=sim.plant.x)
-            except ValueError:
-                print("Divide by zero!")
+                    if plots:
+                        tracker = (sim.encoder.tracker
+                                if params.scheme == 'lloyd-max'
+                                else sim.encoder.source_encoder.tracker)
+                        plot_lloyd_max_tracker(tracker.distr,
+                                tracker.lm_encoder,
+                                tracker.lm_decoder,
+                                tracker, x_hit=sim.plant.x)
             except KeyboardInterrupt:
                 print("Keyboard interrupt!")
             LQG_trajectories.append(LQG_trajectory)

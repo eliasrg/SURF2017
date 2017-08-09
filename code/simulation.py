@@ -1,8 +1,12 @@
 from distributions import gaussian
-from system import Plant, RealChannel, IntegerChannel, LQGCost
+from system import \
+        Plant, RealChannel, IntegerChannel, BinarySymmetricChannel, LQGCost
 import joint.control
 import separate.control.lloyd_max
+import separate.control.noisy_lloyd_max
+import separate.coding.noisy_lloyd_max
 import separate.coding.source
+import separate.coding.convolutional
 import trivial.coding
 from utilities import memoized
 
@@ -18,17 +22,19 @@ class Simulation:
                 gaussian(params.W), gaussian(params.V))
         self.LQG = LQGCost(self.plant, params.Q, params.R, params.F)
 
+        # Globally known data
+        self.globals = SimpleNamespace()
+        # u[t]: control signal at time t
+        self.globals.u = dict()
         if params.analog:
-            # Globally known data
-            self.globals = SimpleNamespace()
-            # u[t]: control signal at time t
-            self.globals.u = dict()
             # x_est_r[t1, t2]: receiver estimate of x(t1) at time t2
             self.globals.x_est_r = dict()
 
             self.channel = RealChannel(gaussian(1 / params.SNR))
+        elif params.p == 0:
+            self.channel = IntegerChannel(2**params.quantizer_bits)
         else:
-            self.channel = IntegerChannel(params.n_codewords)
+            self.channel = BinarySymmetricChannel(params.p)
 
 
         if params.scheme == 'joint':
@@ -40,19 +46,34 @@ class Simulation:
             elif (params.KC, params.KS) == (2, 1):
                 pass # TODO Spiral encoder/decoder
 
-        elif params.scheme == 'separate':
-            pass # TODO Tree codes
-
         elif params.scheme == 'lloyd-max':
             self.observer = separate.control.lloyd_max.Observer(self)
             self.controller = separate.control.lloyd_max.Controller(self)
 
             self.encoder = separate.coding.source.Encoder(
                     self, separate.coding.source.DistributionTracker(
-                        self, params.n_codewords))
+                        self, 2**params.quantizer_bits))
             self.decoder = separate.coding.source.Decoder(
                     self, separate.coding.source.DistributionTracker(
-                        self, params.n_codewords))
+                        self, 2**params.quantizer_bits))
+
+        elif params.scheme == 'noisy-lloyd-max':
+            self.observer = separate.control.noisy_lloyd_max.Observer(self)
+            self.controller = separate.control.noisy_lloyd_max.Controller(self)
+
+            self.convolutional_code = \
+                    separate.coding.convolutional.ConvolutionalCode.random_code(
+                    params.code_blocklength, params.quantizer_bits,
+                    params.T - 1)
+            self.encoder = separate.coding.noisy_lloyd_max.Encoder(
+                    self, separate.coding.source.DistributionTracker(
+                        self, 2**params.quantizer_bits), self.convolutional_code)
+            self.decoder = separate.coding.noisy_lloyd_max.Decoder(
+                    self, separate.coding.source.DistributionTracker(
+                        self, 2**params.quantizer_bits), self.convolutional_code)
+
+        elif params.scheme == 'separate':
+            pass # TODO pulse amplitude modulation
 
     def simulate(self, T):
         self.t = 1
@@ -67,8 +88,7 @@ class Simulation:
             msg_recv = self.decoder.decode(*code_recv)
             # The controller receives the message and generates a control signal
             u = self.controller.control(self.t, *msg_recv)
-            if self.params.analog:
-                self.globals.u[self.t] = u
+            self.globals.u[self.t] = u
 
             yield self.t
 
@@ -105,13 +125,17 @@ class Parameters:
             self.KC = KC
             self.KS = KS
 
+    def setBlocklength(self, code_blocklength):
+        self.code_blocklength = code_blocklength
+
     def setAnalog(self, SNR):
         self.SNR = SNR # 1 / V[n_t]
         self.analog = True
 
-    def setDigital(self, n_codewords):
-        self.n_codewords = n_codewords
+    def setDigital(self, quantizer_bits, p=0):
+        self.quantizer_bits = quantizer_bits
         self.analog = False
+        self.p = p # Bit error probability
 
     def setScheme(self, scheme):
         self.scheme = scheme
@@ -128,6 +152,10 @@ class Parameters:
             raise NotImplementedError("Tree codes not implemented yet")
 
         elif scheme == 'lloyd-max':
+            assert not self.analog
+            pass # Nothing to do
+
+        elif scheme == 'noisy-lloyd-max':
             assert not self.analog
             pass # Nothing to do
 
