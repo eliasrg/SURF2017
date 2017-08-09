@@ -36,23 +36,50 @@ class Decoder:
                 self.convolutional_code, self.sim.channel.p) # Assume BSC
 
     def decode(self, *msg):
+        """The first return value is the decoded plant state estimate.
+        The second return value is None if no previous decoding mistake was
+        detected and a list of the revised estimates of the state at previous
+        times (not including the current time, as this is the last return
+        value)."""
         received_codeword = to_column_vector(msg)
         self.received_codeword_history.append(received_codeword)
 
         # Decode using stack decoder
         bits = self.stack_decoder.decode_block(self.received_codeword_history)
 
+        # Check for mistake
+        revised_x_est_history = None
+
+        # At least one branch has been made
+        assert len(self.stack_decoder.first_nodes) >= 2
+
+        old_node, new_node = self.stack_decoder.first_nodes[-2:]
+        if new_node.parent is not old_node: # Mistake detected
+            # Recover corrected quantizer index history
+            ancestor = new_node.first_common_ancestor(old_node)
+            revised_i_history = [bits_to_int(bits)
+                    for bits in new_node.input_history(stop_at=ancestor)]
+
+            # Delete old source decoder history
+            n_revised_steps = len(revised_i_history)
+            self.source_decoder_history[-n_revised_steps:] = []
+            self.source_decoder = self.source_decoder_history[-1]
+
+            # Update source decoder history and recover revised x estimates
+            revised_x_est_history = [
+                    self.source_decode(i) for i in revised_i_history]
+
         # Convert to quantization index
         i = bits_to_int(bits)
 
         # Recover quantized estimate of x
-        x_est = self.source_decoder.decode(i)[0]
+        x_est = self.source_decode(i)
+
+        return x_est, revised_x_est_history
+
+    def source_decode(self, i):
         self.source_decoder_history.append(self.source_decoder.clone())
-
-        # TODO Check for mistake
-        mistake = None
-
-        return x_est, mistake
+        return self.source_decoder.decode(i)[0]
 
 
 def int_to_bits(i):
