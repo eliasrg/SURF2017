@@ -26,14 +26,20 @@ class Node:
     def is_root(self):
         return self.parent is None
 
-    def reversed_input_history(self):
+    def reversed_input_history(self, stop_at=None):
+        """The reversed input history back to, but not including, the node
+        stop_at. If stop_at is None (the default), return the entire input
+        history."""
         node = self
-        while not node.is_root():
+        while not node.parent == stop_at:
             yield node.input_block
             node = node.parent
 
-    def input_history(self):
-        return reversed(list(self.reversed_input_history()))
+    def input_history(self, stop_at=None):
+        """The reversed input history back to, but not including, the node
+        stop_at. If stop_at is None (the default), return the entire input
+        history."""
+        return reversed(list(self.reversed_input_history(stop_at)))
 
     def extend(self, possible_input_blocks=None):
         """Creates and yields the children of this node.
