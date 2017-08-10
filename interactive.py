@@ -161,7 +161,12 @@ def plot_spiral_decode():
     plot_spiral(spiral_map)
 
     while True:
-        received = plt.ginput(1)[0]
+        # Retrieve a point that the user clicks
+        points = []
+        while not points:
+            points = plt.ginput(1)
+        received = points[0]
+
         plt.scatter([received[0]], [received[1]], color='black')
 
         s = spiral_map.decode(received)
