@@ -65,4 +65,4 @@ class SpiralMap:
 
             return estimates
 
-        return min(s_estimates(1) + s_estimates(-1), key=b_dist)
+        return min(s_estimates(1) + s_estimates(-1) + [0], key=b_dist)
