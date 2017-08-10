@@ -28,9 +28,8 @@ class SpiralMap:
             angle_guess = tau * floor(omega * abs(b) / (tau * c)) \
                     + atan2(sign * b.imag, sign * b.real) % tau
             # Just sprinkle a few guesses around
-            s_guesses = [angle_guess / (sign * omega),
-                        (angle_guess - tau) / (sign * omega),
-                        (angle_guess + tau) / (sign * omega)]
+            s_guesses = [(angle_guess + n*tau/4) / (sign * omega)
+                for n in range(-4, 5)]
 
             iσω = 1j * sign * omega
             def g(s):
@@ -65,4 +64,4 @@ class SpiralMap:
 
             return estimates
 
-        return min(s_estimates(1) + s_estimates(-1) + [0], key=b_dist)
+        return min(s_estimates(1) + s_estimates(-1), key=b_dist)
