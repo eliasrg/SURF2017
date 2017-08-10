@@ -21,6 +21,8 @@ class Encoder:
         # Encode bits with tree code
         codeword = self.convolutional_code.encode(self.bits_history)
 
+        print("Send {}, ".format(i), end="")
+
         # Send to channel
         return bits
 
@@ -71,6 +73,11 @@ class Decoder:
 
         # Convert to quantization index
         i = bits_to_int(bits)
+        print("receive {}".format(i))
+
+        import numpy as np
+        print("Index history: {}".format(
+            np.array(list(self.stack_decoder.first_nodes[-1].input_history())).flatten()))
 
         # Recover quantized estimate of x
         x_est = self.source_decode(i)

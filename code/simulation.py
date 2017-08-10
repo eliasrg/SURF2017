@@ -64,7 +64,8 @@ class Simulation:
             self.convolutional_code = \
                     separate.coding.convolutional.ConvolutionalCode.random_code(
                     params.code_blocklength, params.quantizer_bits,
-                    params.T - 1)
+                    # params.T - 1)
+                    1)
             self.encoder = separate.coding.noisy_lloyd_max.Encoder(
                     self, separate.coding.source.DistributionTracker(
                         self, 2**params.quantizer_bits), self.convolutional_code)

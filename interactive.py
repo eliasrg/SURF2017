@@ -33,7 +33,7 @@ def simulate(plots=False):
         # params.setScheme('joint')
         # params.setDigital(quantizer_bits = 1)
         # params.setScheme('lloyd-max')
-        params.setDigital(quantizer_bits = 1, p = 0.03)
+        params.setDigital(quantizer_bits = 1, p = 1e-10)
         params.setBlocklength(1)
         params.setScheme('noisy-lloyd-max')
 
