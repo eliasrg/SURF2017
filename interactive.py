@@ -13,6 +13,7 @@ import separate.coding.source.lloyd_max as lm
 from separate.coding.convolutional import ConvolutionalCode, Node, \
         NaiveMLDecoder, StackDecoder
 from utilities import hamming_distance
+from joint.coding import SpiralMap
 
 
 n_runs = 1 << 0
@@ -140,6 +141,36 @@ def test_update(i=4):
     plot_lloyd_max(tracker.distr, tracker.lm_encoder, tracker.lm_decoder)
     tracker.update(i, debug_globals=globals())
     plot_lloyd_max(tracker.distr, tracker.lm_encoder, tracker.lm_decoder)
+
+def plot_spiral(spiral_map):
+    s = np.linspace(0, 7, num=1000)
+
+    # Positive s
+    x, y = list(zip(*map(spiral_map.encode, s)))
+    plt.plot(x, y, 'orange')
+
+    # Negative s
+    x, y = list(zip(*map(spiral_map.encode, -s)))
+    plt.plot(x, y, 'blue')
+
+    plt.axis('square')
+
+def plot_spiral_decode():
+    spiral_map = SpiralMap(2, 3)
+    fig = plt.figure()
+    plot_spiral(spiral_map)
+
+    while True:
+        received = plt.ginput(1)[0]
+        plt.scatter([received[0]], [received[1]], color='black')
+
+        s = spiral_map.decode(received)
+        decoded = spiral_map.encode(s)
+        plt.scatter([decoded[0]], [decoded[1]], color='purple')
+        plt.plot([received[0], decoded[0]], [received[1], decoded[1]],
+                color='purple')
+
+        fig.canvas.draw()
 
 
 def show(delay=0):
