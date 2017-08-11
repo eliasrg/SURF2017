@@ -151,13 +151,15 @@ def plot_spiral(spiral_map):
 
     # Negative s
     x, y = list(zip(*map(spiral_map.encode, -s)))
-    plt.plot(x, y, 'blue')
+    plt.plot(x, y, 'lightblue')
 
     plt.axis('square')
+    plt.axis([-22, 22, -22, 22])
 
 def plot_spiral_decode():
     spiral_map = SpiralMap(2, 3)
     fig = plt.figure()
+    plt.title("Closest point on Archimedean bi-spiral")
     plot_spiral(spiral_map)
 
     while True:
@@ -167,13 +169,13 @@ def plot_spiral_decode():
             points = plt.ginput(1)
         received = points[0]
 
-        plt.scatter([received[0]], [received[1]], color='black')
-
         s = spiral_map.decode(received)
         decoded = spiral_map.encode(s)
-        plt.scatter([decoded[0]], [decoded[1]], color='purple')
+
+        plt.scatter([received[0]], [received[1]], color='tomato')
         plt.plot([received[0], decoded[0]], [received[1], decoded[1]],
-                color='purple')
+                color='tomato')
+        plt.scatter([decoded[0]], [decoded[1]], color='tomato')
 
         fig.canvas.draw()
 
