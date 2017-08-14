@@ -45,6 +45,7 @@ def full_rank(M):
 
 def hamming_distance(a, b):
     """Computes the Hamming distance between two binary (column) vectors."""
+    assert a.size == b.size
     return np.abs(a - b).sum()
 
 def blockify(data, k):

@@ -24,7 +24,7 @@ class Encoder:
         print("Send {}, ".format(i), end="")
 
         # Send to channel
-        return bits
+        return codeword
 
 class Decoder:
     """Combined source and channel encoder."""
