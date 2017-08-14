@@ -22,7 +22,7 @@ class Encoder:
         codeword = self.convolutional_code.encode(self.bits_history)
 
         # Send to channel
-        return bits
+        return codeword
 
 class Decoder:
     """Combined source and channel encoder."""
