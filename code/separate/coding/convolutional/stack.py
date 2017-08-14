@@ -2,7 +2,7 @@ from .node import Node
 from utilities import hamming_distance
 
 import numpy as np
-from queue import PriorityQueue
+from queue import PriorityQueue, Empty
 from numbers import Number
 
 class StackDecoder:
@@ -32,6 +32,8 @@ class StackDecoder:
         # The first node in each layer
         self.first_nodes = [root]
 
+        self.explored = [root]
+
     def extend(self, node, codeword):
         for child in node.extend():
             # Calculate the metric increment
@@ -48,6 +50,7 @@ class StackDecoder:
             child.metric = node.metric + metric_increment
 
             self.nodes.put(child)
+            self.explored.append(child)
 
     def decode_node(self, received_sequence):
         """Returns the node corresponding to the decoded path."""
@@ -57,6 +60,8 @@ class StackDecoder:
 
             depth = len(self.first_nodes) - 1 # Max depth among explored nodes
             if node.depth == depth + 1:
+                if node.parent is not self.first_nodes[-1]:
+                    print("Mistake! {}".format(node))
                 self.first_nodes.append(node)
 
             if node.depth == len(received_sequence):
@@ -80,6 +85,16 @@ class StackDecoder:
         # have been simplified away
         p = self.p
         return rho - (1 + rho) * np.log2(p**(1/(1+rho)) + (1 - p)**(1/(1+rho)))
+
+    def nodes_to_list(self):
+        nodes = []
+        try:
+            while True:
+                nodes.append(self.nodes.get_nowait())
+        except Empty:
+            for node in nodes:
+                self.nodes.put(node)
+            return nodes
 
     class Node(Node):
         """A node with a comparison operator for use in a min-priority queue."""

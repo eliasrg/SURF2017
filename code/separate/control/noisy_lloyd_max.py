@@ -21,7 +21,7 @@ class Observer:
         self.x_u_ideal.step(u_ideal)
 
         # Pass to the source and channel encoders
-        print("x_est_ideal - x_est = {}".format(x_est_ideal - x_est))
+        # print("x_est_ideal - x_est = {}".format(x_est_ideal - x_est))
         # return (x_est_ideal,)
         return (x_est,)
 

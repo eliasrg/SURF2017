@@ -34,7 +34,7 @@ def simulate(plots=False):
         # params.setDigital(quantizer_bits = 1)
         # params.setScheme('lloyd-max')
         params.setDigital(quantizer_bits = 1, p = 1e-10)
-        params.setBlocklength(1)
+        params.setBlocklength(2)
         params.setScheme('noisy-lloyd-max')
 
         LQG_trajectories = []

@@ -23,6 +23,15 @@ class Node:
             self.input_block = input_block
             # codeword is set by the call to parent.extend()
 
+    def __str__(self):
+        input_block = self.input_block.flatten() if not self.is_root() else None
+        codeword = self.codeword.flatten() if not self.is_root() else None
+        return "{}[depth {}, input {}, codeword {}]".format(
+                self.__class__.__name__, self.depth, input_block, codeword)
+
+    def __repr__(self):
+        return str(self)
+
     def is_root(self):
         return self.parent is None
 

@@ -64,8 +64,8 @@ class Simulation:
             self.convolutional_code = \
                     separate.coding.convolutional.ConvolutionalCode.random_code(
                     params.code_blocklength, params.quantizer_bits,
-                    # params.T - 1)
-                    1)
+                    params.T - 1)
+                    # 0)
             self.encoder = separate.coding.noisy_lloyd_max.Encoder(
                     self, separate.coding.source.DistributionTracker(
                         self, 2**params.quantizer_bits), self.convolutional_code)
@@ -83,8 +83,10 @@ class Simulation:
             msg = self.observer.observe(self.t, self.plant.y)
             # The encoder encodes the message
             code = self.encoder.encode(*msg)
+            print("code = {}".format(code))
             # The encoded message is sent over the channel
             code_recv = self.channel.transmit(code)
+            print("code_recv = {}".format(code_recv))
             # The decoder decodes the encoded message
             msg_recv = self.decoder.decode(*code_recv)
             # The controller receives the message and generates a control signal

@@ -44,6 +44,8 @@ class Decoder:
         times (not including the current time, as this is the last return
         value)."""
         received_codeword = to_column_vector(msg)
+        print("msg = {}".format(msg))
+        print("received_codeword = {}".format(received_codeword))
         self.received_codeword_history.append(received_codeword)
 
         # Decode using stack decoder
