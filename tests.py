@@ -93,17 +93,22 @@ class TestStackDecoder(unittest.TestCase):
     code = ConvolutionalCode(2, 1, Gs)
     received_sequence = [np.array([x]).transpose() for x in
             [[0,1], [1,0], [0,1], [1,0], [1,1]]]
-    decoder = StackDecoder(code, 0.03)
     nominal_input = [np.array([[x]]) for x in [1, 0, 1, 0, 0]]
+
+    def __init__(self, *args):
+        super().__init__(*args)
+        self.decoder = StackDecoder(self.code, 0.03)
 
     def test_decode(self):
         decoded_input = list(self.decoder.decode(self.received_sequence))
         self.assertEqual(decoded_input, self.nominal_input)
 
-    @staticmethod
-    def decode_long_code(n_blocks=1000, noise=False):
-        n = 3
-        k = 2
+class TestStackRandomCode(unittest.TestCase):
+    N_DEFAULT = 3
+    K_DEFAULT = 2
+
+    def test_decode(self, n_blocks=1000, n=N_DEFAULT, k=K_DEFAULT,
+            noise=False, incremental=False):
         p = 0.03 if noise else 1e-10
         bias_mode = 'E0'
         code = ConvolutionalCode.random_code(n, k, n_blocks - 1)
@@ -121,12 +126,25 @@ class TestStackDecoder(unittest.TestCase):
                 ^ np.array(code_sequence).flatten()))
         print("Input:   {}".format(input_sequence))
 
-        decoded = np.array(list(
-            StackDecoder(code, p, bias_mode=bias_mode)
-            .decode(received_sequence))).flatten()
+        decoder = StackDecoder(code, p, bias_mode=bias_mode)
+        if incremental:
+            decoded = np.array([
+                decoder.decode_block(received_sequence[:i+1])
+                for i in range(len(received_sequence))]).flatten()
+        else:
+            decoded = np.array(list(
+                decoder.decode(received_sequence))).flatten()
 
         print("Decoded: {}".format(decoded))
         print("Success!" if (decoded == input_sequence).all() else "Failure!")
+
+        # For interactive debugging
+        self.code = code
+        self.input_sequence = input_sequence
+        self.code_sequence = code_sequence
+        self.received_sequence = received_sequence
+        self.decoder = decoder
+        self.decoded = decoded
 
 class CompareStackDecoders(unittest.TestCase):
     N_DEFAULT = 3
@@ -151,13 +169,14 @@ class CompareStackDecoders(unittest.TestCase):
                 ^ np.array(code_sequence).flatten()))
         print("Input:   {}".format(input_sequence))
 
-        decoded_own = np.array(list(
-            StackDecoder(code, p, bias_mode=bias_mode)
-            .decode(received_sequence))).flatten()
+        node = StackDecoder(code, p, bias_mode=bias_mode) \
+            .decode_node(received_sequence)
+        metric_own = node.metric
+        decoded_own = np.array(list(node.input_history())).flatten()
         print("Decoded: {} ({})".format(decoded_own,
             "success" if (decoded_own == input_sequence).all() else "failure"))
 
-        _, decoded_anatoly, _ = anatoly.stack_dec(
+        metric_anatoly, decoded_anatoly, _ = anatoly.stack_dec(
                 np.matrix(to_column_vector(received_sequence)),
                 np.matrix(code.generator_matrix(n_blocks)),
                 k, n, n_blocks, p, bias=bias_mode)
@@ -171,6 +190,9 @@ class CompareStackDecoders(unittest.TestCase):
             print("Diff:    {}".format(
                 np.array(decoded_anatoly).flatten() ^ input_sequence))
 
+        print("Elias metric:   {}".format(metric_own))
+        print("Anatoly metric: {}".format(metric_anatoly))
+
         self.assertTrue(
                 (decoded_own == np.array(decoded_anatoly).flatten()).all())
 
@@ -183,6 +205,7 @@ class CompareStackDecoders(unittest.TestCase):
                 print()
             except AssertionError:
                 break
+
 
 if __name__ == '__main__':
     unittest.main()
