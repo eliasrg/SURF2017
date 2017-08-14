@@ -55,9 +55,11 @@ class StackDecoder:
         while True:
             node = self.nodes.get()
 
-            if node.depth == len(received_sequence):
+            depth = len(self.first_nodes) - 1 # Max depth among explored nodes
+            if node.depth == depth + 1:
                 self.first_nodes.append(node)
 
+            if node.depth == len(received_sequence):
                 # Add it back to the queue so it can be extended in the future
                 self.nodes.put(node)
 
