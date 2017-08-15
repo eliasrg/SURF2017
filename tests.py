@@ -117,7 +117,8 @@ class TestStackRandomCode(unittest.TestCase):
         code_sequence = code.encode_sequence(blockify(input_sequence, k))
 
         channel = BinarySymmetricChannel(p if noise else 0)
-        received_sequence = [list(channel.transmit(c)) for c in code_sequence]
+        received_sequence = [np.array(list(channel.transmit(c)))
+                for c in code_sequence]
 
         print("Encoded: {}".format(np.array(code_sequence).flatten()))
         if noise:
@@ -160,7 +161,8 @@ class CompareStackDecoders(unittest.TestCase):
         code_sequence = code.encode_sequence(blockify(input_sequence, k))
 
         channel = BinarySymmetricChannel(p if noise else 0)
-        received_sequence = [list(channel.transmit(c)) for c in code_sequence]
+        received_sequence = [np.array(list(channel.transmit(c)))
+                for c in code_sequence]
 
         print("Encoded: {}".format(np.array(code_sequence).flatten()))
         if noise:
