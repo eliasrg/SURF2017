@@ -44,6 +44,7 @@ class Controller:
 
         # Generate the control signal
         u = -sim.params.L(t) * x_est
+        self.u_history.append(u)
 
         # Correct for mistake
         if revised_x_est_history is not None:
@@ -63,7 +64,12 @@ class Controller:
                 u_corrected = -sim.params.L(tau) * x_corrected
                 x_correction.step(u_corrected - u_actual)
 
+                # Rewrite the output history as if no mistake had occurred
+                self.u_history[tau - 1] = u_corrected
+
             u += sim.params.alpha * x_correction.value
+            # Do not record this correction in self.u_history[t].
+            # We have already recorded that the ideal control signal was sent.
 
         return u
 
