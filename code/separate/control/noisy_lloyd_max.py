@@ -16,8 +16,13 @@ class Observer:
         x_est_uncontrolled = x_est - self.x_u_actual.value
         x_est_ideal = x_est_uncontrolled + self.x_u_ideal.value
 
+        # Quantize it TODO restructure so quantization only happens once?
+        tracker = self.sim.encoder.source_encoder.tracker
+        x_est_ideal_quantized = \
+                tracker.lm_decoder.decode(tracker.lm_encoder.encode(x_est))
+
         # Update the controlled part of the ideal plant
-        u_ideal = -self.sim.params.L(t) * x_est_ideal
+        u_ideal = -self.sim.params.L(t) * x_est_ideal_quantized
         self.x_u_ideal.step(u_ideal)
 
         # Pass to the source and channel encoders
