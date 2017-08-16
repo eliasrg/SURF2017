@@ -58,12 +58,15 @@ class Decoder:
             # Recover corrected quantizer index history
             ancestor = new_node.first_common_ancestor(old_node)
             revised_i_history = [bits_to_int(bits)
-                    for bits in new_node.input_history(stop_at=ancestor)]
+                    for bits in new_node.parent.input_history(stop_at=ancestor)]
 
             # Delete old source decoder history
             n_revised_steps = len(revised_i_history)
-            self.source_decoder_history[-n_revised_steps:] = []
+            assert n_revised_steps > 0
+            del self.source_decoder_history[len(self.source_decoder_history)
+                    - (n_revised_steps-1):]
             self.source_decoder = self.source_decoder_history[-1]
+            del self.source_decoder_history[-1]
 
             # Update source decoder history and recover revised x estimates
             revised_x_est_history = [
