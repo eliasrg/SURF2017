@@ -7,9 +7,13 @@ class Observer:
         self.x_u_actual = DeterministicPlant(sim.params.alpha)
 
     def observe(self, t, y):
+        # print("t = {}".format(t))
+
         # Update the controlled part of the actual plant
         u_actual_previous = self.sim.globals.u[t-1] if t > 1 else 0
         self.x_u_actual.step(u_actual_previous)
+
+        # print("u_actual_previous = {}".format(u_actual_previous))
 
         # Calculate the ideal (noiseless) estimate
         x_est = y # TODO take observation noise into account
@@ -26,6 +30,10 @@ class Observer:
         self.x_u_ideal.step(u_ideal)
 
         # Pass to the source and channel encoders
+        # print("x_est_ideal - x_est = {}".format(x_est_ideal - x_est))
+        print("x_est       = {}".format(x_est))
+        print("x_est_ideal = {}".format(x_est_ideal))
+        print("x_est_ideal_quantized = {}".format(x_est_ideal_quantized))
         return (x_est_ideal,)
 
 
@@ -41,6 +49,7 @@ class Controller:
         # One real number and None or a list to indicate mistake
         assert len(msg) == 2
         x_est, revised_x_est_history = msg
+        print("x_est (quantized)     = {}".format(x_est))
 
         # Generate the control signal
         u = -sim.params.L(t) * x_est
@@ -57,6 +66,8 @@ class Controller:
             # First time where there is a difference between estimates
             t1 = t - n_revised_steps
 
+            assert n_revised_steps == len(list(range(t1, t)))
+
             # Calculate the deviation -x_correction due to the mistake
             for tau in range(t1, t):
                 u_actual = self.u_history[tau - 1] # Time starts at 1
@@ -67,9 +78,12 @@ class Controller:
                 # Rewrite the output history as if no mistake had occurred
                 self.u_history[tau - 1] = u_corrected
 
+            print("Detected x error: {}".format(x_correction.value))
             u += sim.params.alpha * x_correction.value
             # Do not record this correction in self.u_history[t].
             # We have already recorded that the ideal control signal was sent.
+
+        # print("u = {}".format(u))
 
         return u
 

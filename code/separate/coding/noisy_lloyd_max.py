@@ -54,11 +54,20 @@ class Decoder:
         assert len(self.stack_decoder.first_nodes) >= 2
 
         old_node, new_node = self.stack_decoder.first_nodes[-2:]
+        assert new_node.depth == old_node.depth + 1
         if new_node.parent is not old_node: # Mistake detected
+            print("len before: {}".format(len(self.source_decoder_history)))
             # Recover corrected quantizer index history
             ancestor = new_node.first_common_ancestor(old_node)
             revised_i_history = [bits_to_int(bits)
                     for bits in new_node.parent.input_history(stop_at=ancestor)]
+            unrevised_i_history = [bits_to_int(bits)
+                    for bits in old_node.input_history(stop_at=ancestor)]
+            print("  revised_i_history = {}".format(revised_i_history))
+            print("unrevised_i_history = {}".format(unrevised_i_history))
+            print("Depths: ancestor {}, old_node {}, new_node {}".format(
+                ancestor.depth, old_node.depth, new_node.depth))
+
 
             # Delete old source decoder history
             n_revised_steps = len(revised_i_history)
@@ -72,7 +81,10 @@ class Decoder:
             revised_x_est_history = [
                     self.source_decode(i) for i in revised_i_history]
 
+            print("len after: {}".format(len(self.source_decoder_history)))
+
         # Convert to quantization index
+        assert bits is self.stack_decoder.first_nodes[-1].input_block
         i = bits_to_int(bits)
 
         # Recover quantized estimate of x
