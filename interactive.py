@@ -13,6 +13,7 @@ import separate.coding.source.lloyd_max as lm
 from separate.coding.convolutional import ConvolutionalCode, Node, \
         NaiveMLDecoder, StackDecoder
 from utilities import hamming_distance
+from joint.coding import SpiralMap
 
 
 n_runs = 1 << 0
@@ -140,6 +141,43 @@ def test_update(i=4):
     plot_lloyd_max(tracker.distr, tracker.lm_encoder, tracker.lm_decoder)
     tracker.update(i, debug_globals=globals())
     plot_lloyd_max(tracker.distr, tracker.lm_encoder, tracker.lm_decoder)
+
+def plot_spiral(spiral_map):
+    s = np.linspace(0, 7, num=1000)
+
+    # Positive s
+    x, y = list(zip(*map(spiral_map.encode, s)))
+    plt.plot(x, y, 'orange')
+
+    # Negative s
+    x, y = list(zip(*map(spiral_map.encode, -s)))
+    plt.plot(x, y, 'lightblue')
+
+    plt.axis('square')
+    plt.axis([-22, 22, -22, 22])
+
+def plot_spiral_decode():
+    spiral_map = SpiralMap(2, 3)
+    fig = plt.figure()
+    plt.title("Closest point on Archimedean bi-spiral")
+    plot_spiral(spiral_map)
+
+    while True:
+        # Retrieve a point that the user clicks
+        points = []
+        while not points:
+            points = plt.ginput(1)
+        received = points[0]
+
+        s = spiral_map.decode(received)
+        decoded = spiral_map.encode(s)
+
+        plt.scatter([received[0]], [received[1]], color='tomato')
+        plt.plot([received[0], decoded[0]], [received[1], decoded[1]],
+                color='tomato')
+        plt.scatter([decoded[0]], [decoded[1]], color='tomato')
+
+        fig.canvas.draw()
 
 
 def show(delay=0):
