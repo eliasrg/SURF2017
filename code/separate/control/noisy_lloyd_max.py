@@ -19,7 +19,7 @@ class Observer:
         # Quantize it TODO restructure so quantization only happens once?
         tracker = self.sim.encoder.source_encoder.tracker
         x_est_ideal_quantized = \
-                tracker.lm_decoder.decode(tracker.lm_encoder.encode(x_est))
+                tracker.lm_decoder.decode(tracker.lm_encoder.encode(x_est_ideal))
 
         # Update the controlled part of the ideal plant
         u_ideal = -self.sim.params.L(t) * x_est_ideal_quantized
