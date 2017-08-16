@@ -31,7 +31,7 @@ class Node:
         stop_at. If stop_at is None (the default), return the entire input
         history."""
         node = self
-        while not node.parent == stop_at:
+        while not (node.is_root() or node is stop_at):
             yield node.input_block
             node = node.parent
 
