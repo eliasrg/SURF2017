@@ -8,7 +8,7 @@ from numpy import linalg as LA
 LIMIT = 10
 
 # Maximum number of iterations for the Lloyd-Max algorithm
-MAX_ITERATIONS = 20
+MAX_ITERATIONS = 200
 
 class Encoder:
     def __init__(self, boundaries):
