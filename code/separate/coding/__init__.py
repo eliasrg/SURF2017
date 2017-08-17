@@ -15,4 +15,7 @@ class Encoder:
 
         return [(-1)**bit for bit in binary_codeword]
 
+    def get_tracker(self):
+        return self.noisy_lloyd_max_encoder.get_tracker()
+
 Decoder = noisy_lloyd_max.Decoder

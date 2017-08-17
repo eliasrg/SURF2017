@@ -24,6 +24,9 @@ class Encoder:
         # Send to channel
         return codeword
 
+    def get_tracker(self):
+        return self.source_encoder.tracker
+
 class Decoder:
     """Combined source and channel encoder."""
     def __init__(self, sim, tracker, convolutional_code):

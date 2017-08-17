@@ -17,7 +17,7 @@ class Observer:
         x_est_ideal = x_est_uncontrolled + self.x_u_ideal.value
 
         # Quantize it TODO restructure so quantization only happens once?
-        tracker = self.sim.encoder.source_encoder.tracker
+        tracker = self.sim.encoder.get_tracker()
         x_est_ideal_quantized = \
                 tracker.lm_decoder.decode(tracker.lm_encoder.encode(x_est_ideal))
 

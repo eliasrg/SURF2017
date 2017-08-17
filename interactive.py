@@ -45,8 +45,7 @@ def simulate(plots=False):
             #                        for t in sim.simulate(T))
             LQG_trajectory = []
             if plots:
-                tracker = (sim.encoder.tracker if params.scheme == 'lloyd-max'
-                        else sim.encoder.source_encoder.tracker)
+                tracker = sim.encoder.get_tracker()
                 plot_lloyd_max(tracker.distr,
                         tracker.lm_encoder,
                         tracker.lm_decoder, x_hit=sim.plant.x)
@@ -55,9 +54,7 @@ def simulate(plots=False):
                     print("Run {:d}, t = {:d}".format(i, t))
                     LQG_trajectory.append(sim.LQG.evaluate(t))
                     if plots:
-                        tracker = (sim.encoder.tracker
-                                if params.scheme == 'lloyd-max'
-                                else sim.encoder.source_encoder.tracker)
+                        tracker = sim.encoder.get_tracker()
                         plot_lloyd_max_tracker(tracker.distr,
                                 tracker.lm_encoder,
                                 tracker.lm_decoder,

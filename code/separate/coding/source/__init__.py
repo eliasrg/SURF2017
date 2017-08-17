@@ -22,6 +22,9 @@ class Encoder:
         self.tracker.update(i)
         return (i,)
 
+    def get_tracker(self):
+        return self.tracker
+
 
 class Decoder:
     def __init__(self, sim, tracker):
