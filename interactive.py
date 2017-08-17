@@ -33,6 +33,7 @@ def simulate(plots=False):
         # params.setRates(KC = 2, KS = 1)
         # params.setAnalog(SNR)
         # params.setScheme('joint')
+        # print("SDR0 = {}".format(params.SDR0))
 
         # params.setDigital(quantizer_bits = 1)
         # params.setScheme('lloyd-max')
