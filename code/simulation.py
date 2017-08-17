@@ -2,6 +2,7 @@ from distributions import gaussian
 from system import \
         Plant, RealChannel, IntegerChannel, BinarySymmetricChannel, LQGCost
 import joint.control
+import joint.coding
 import separate.control.lloyd_max
 import separate.control.noisy_lloyd_max
 import separate.coding.noisy_lloyd_max
@@ -44,7 +45,9 @@ class Simulation:
                 self.encoder = trivial.coding.Encoder(self)
                 self.decoder = trivial.coding.Decoder(self)
             elif (params.KC, params.KS) == (2, 1):
-                pass # TODO Spiral encoder/decoder
+                spiral_map = joint.coding.SpiralMap(params.omega, params.c_reg)
+                self.encoder = joint.coding.Encoder(self, spiral_map)
+                self.decoder = joint.coding.Decoder(self, spiral_map)
 
         elif params.scheme == 'lloyd-max':
             self.observer = separate.control.lloyd_max.Observer(self)
@@ -145,7 +148,10 @@ class Parameters:
                 # Channel code signal-distortion ratio, 1 / V[neff_t]
                 self.SDR0 = self.SNR # Optimum is achieved
             elif (self.KC, self.KS) == (2, 1):
-                raise NotImplementedError("Spiral not implemented yet")
+                # TODO Allow these parameters to be chosen
+                self.c_reg = np.sqrt(2)
+                self.omega = 1
+                self.SDR0 = self.SNR # TODO Measure actual SDR0
 
         elif scheme == 'separate':
             assert self.analog

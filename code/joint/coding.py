@@ -3,6 +3,24 @@ import numpy as np
 from numpy import exp
 from scipy.optimize import newton
 
+class Encoder:
+    def __init__(self, sim, spiral_map):
+        self.sim = sim
+        self.spiral_map = spiral_map
+
+    def encode(self, *msg):
+        (s_norm,) = msg
+        return self.spiral_map.encode(s_norm)
+
+class Decoder:
+    def __init__(self, sim, spiral_map):
+        self.sim = sim
+        self.spiral_map = spiral_map
+
+    def decode(self, *received):
+        assert len(received) == 2
+        return (self.spiral_map.decode(received),)
+
 class SpiralMap:
     # Use a complex representation internally for simplicity
     def __init__(self, omega, c):
