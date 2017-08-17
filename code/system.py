@@ -34,6 +34,9 @@ class RealChannel:
     def average_power(self):
         return self.total_power / self.uses
 
+    def clone(self):
+        return RealChannel(self.n_distr)
+
 class IntegerChannel:
     """Noiseless fixed-rate digital channel.
     Transmits integers in the range [0, 2^R - 1]."""
@@ -49,6 +52,9 @@ class IntegerChannel:
     def average_power(self):
         return float('nan')
 
+    def clone(self):
+        return IntegerChannel(self.n_symbols)
+
 class BinarySymmetricChannel:
     """Flips each bit with probability p."""
     def __init__(self, p):
@@ -62,6 +68,9 @@ class BinarySymmetricChannel:
 
     def average_power(self):
         return float('nan')
+
+    def clone(self):
+        return BinarySymmetricChannel(self.p)
 
 
 class LQGCost:
