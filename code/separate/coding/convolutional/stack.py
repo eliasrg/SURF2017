@@ -42,7 +42,7 @@ class StackDecoder:
             d = hamming_distance(codeword, child.codeword)
 
             metric_increment = \
-                    d * np.log2(p) + (n - d) * np.log(1 - p) \
+                    d * np.log2(p) + (n - d) * np.log2(1 - p) \
                     + (1 - B) * n
 
             child.metric = node.metric + metric_increment
