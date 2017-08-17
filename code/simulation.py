@@ -48,6 +48,7 @@ class Simulation:
                 spiral_map = joint.coding.SpiralMap(params.omega, params.c_reg)
                 self.encoder = joint.coding.Encoder(self, spiral_map)
                 self.decoder = joint.coding.Decoder(self, spiral_map)
+                self.params.SDR0 = self.measure_SDR()
 
         elif params.scheme == 'lloyd-max':
             self.observer = separate.control.lloyd_max.Observer(self)
@@ -101,6 +102,21 @@ class Simulation:
             self.t += 1
         yield self.t
 
+    def measure_SDR(self):
+        assert self.params.analog
+        N_ITERATIONS = 1000
+        signal_distr = gaussian(1)
+        channel = self.channel.clone()
+        distortions = []
+
+        for signal in signal_distr.rvs(size=N_ITERATIONS):
+            encoded = self.encoder.encode(signal)
+            received = channel.transmit(encoded)
+            (signal_estimate,) = self.decoder.decode(*received)
+            distortions.append(signal - signal_estimate)
+
+        return 1 / (np.array(distortions)**2).mean()
+
 
 class Parameters:
     def __init__(self, T, alpha, W, V, Q, R, F):
@@ -151,7 +167,7 @@ class Parameters:
                 # TODO Allow these parameters to be chosen
                 self.c_reg = np.sqrt(2)
                 self.omega = 1
-                self.SDR0 = self.SNR # TODO Measure actual SDR0
+                # SDR0 is measured by the simulation object
 
         elif scheme == 'separate':
             assert self.analog
