@@ -22,7 +22,7 @@ class Encoder:
         codeword = self.convolutional_code.encode(self.bits_history)
 
         # Send to channel
-        return codeword
+        return codeword.flatten()
 
     def get_tracker(self):
         return self.source_encoder.tracker
