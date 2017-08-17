@@ -95,6 +95,10 @@ def plot():
     if params.analog:
         plt.plot((1, T),
             10 * np.log10(params.LQR_inf_lower_bound()) * np.ones(2), 'r--')
+        if hasattr(params, 'SDR0'):
+            plt.plot((1, T),
+                    10 * np.log10(params.LQR_inf_upper_bound()) * np.ones(2),
+                    'g--')
 
     plt.ylim(0, 50)
     plt.grid()
