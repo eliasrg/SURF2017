@@ -32,8 +32,15 @@ class Decoder:
         self.source_decoder_history = [self.source_decoder]
         self.convolutional_code = convolutional_code
         self.received_codeword_history = []
-        self.stack_decoder = stack.StackDecoder(
-                self.convolutional_code, self.sim.channel.p) # Assume BSC
+
+        if self.sim.params.analog:
+            # AWGN(SNR)
+            self.stack_decoder = stack.StackDecoder(
+                    self.convolutional_code, SNR=self.sim.params.SNR)
+        else:
+            # BSC(p)
+            self.stack_decoder = stack.StackDecoder(
+                    self.convolutional_code, p=self.sim.params.p)
 
     def decode(self, *msg):
         """The first return value is the decoded plant state estimate.
