@@ -5,6 +5,7 @@ import joint.control
 import joint.coding
 import separate.control.lloyd_max
 import separate.control.noisy_lloyd_max
+import separate.coding
 import separate.coding.noisy_lloyd_max
 import separate.coding.source
 import separate.coding.convolutional
@@ -77,7 +78,19 @@ class Simulation:
                         self, 2**params.quantizer_bits), self.convolutional_code)
 
         elif params.scheme == 'separate':
-            pass # TODO pulse amplitude modulation
+            self.observer = separate.control.noisy_lloyd_max.Observer(self)
+            self.controller = separate.control.noisy_lloyd_max.Controller(self)
+
+            self.convolutional_code = \
+                    separate.coding.convolutional.ConvolutionalCode.random_code(
+                    params.code_blocklength, params.quantizer_bits,
+                    params.T - 1)
+            self.encoder = separate.coding.Encoder(
+                    self, separate.coding.source.DistributionTracker(
+                        self, 2**params.quantizer_bits), self.convolutional_code)
+            self.decoder = separate.coding.Decoder(
+                    self, separate.coding.source.DistributionTracker(
+                        self, 2**params.quantizer_bits), self.convolutional_code)
 
     def simulate(self, T):
         self.t = 1
@@ -171,7 +184,7 @@ class Parameters:
 
         elif scheme == 'separate':
             assert self.analog
-            raise NotImplementedError("Tree codes not implemented yet")
+            pass # Nothing to do
 
         elif scheme == 'lloyd-max':
             assert not self.analog

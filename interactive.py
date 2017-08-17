@@ -29,14 +29,23 @@ def simulate(plots=False):
                 alpha = 1.5,
                 W = 1, V = 0, # Lloyd-Max paper assumes no observation noise
                 Q = 1, R = 1, F = 1)
-        params.setRates(KC = 2, KS = 1)
-        params.setAnalog(SNR)
-        params.setScheme('joint')
+
+        # params.setRates(KC = 2, KS = 1)
+        # params.setAnalog(SNR)
+        # params.setScheme('joint')
+
         # params.setDigital(quantizer_bits = 1)
         # params.setScheme('lloyd-max')
+
         # params.setDigital(quantizer_bits = 1, p = 0.1)
         # params.setBlocklength(3)
         # params.setScheme('noisy-lloyd-max')
+
+        params.setRates(KC = 2, KS = 1)
+        params.setAnalog(SNR)
+        params.quantizer_bits = 1
+        params.setBlocklength(2)
+        params.setScheme('separate')
 
         LQG_trajectories = []
         for i in range(n_runs):
