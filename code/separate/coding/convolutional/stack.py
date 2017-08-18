@@ -1,9 +1,10 @@
 from .node import Node
-from utilities import hamming_distance
+from utilities import hamming_distance, memoized
 
 import numpy as np
 import scipy.stats as stats
 from scipy.integrate import quad
+from scipy.optimize import minimize
 from queue import PriorityQueue
 from numbers import Number
 
@@ -116,6 +117,13 @@ class StackDecoder:
             return 1 + rho - np.log2(quad(lambda z:
                     ( w(z - 1)**(1/(1+rho)) + w(z + 1)**(1/(1+rho)) )**(1+rho),
                     -np.inf, np.inf)[0])
+
+    @memoized
+    def EJ(self):
+        # Function to maximize
+        f = lambda rho: rho / (1 + rho) * (
+                self.E0(rho) + self.bias - (1 + rho) * self.code.rate())
+        return -minimize(lambda rho: -f(rho), 0.5, bounds=[[0,1]]).fun[0]
 
     class Node(Node):
         """A node with a comparison operator for use in a min-priority queue."""
