@@ -2,6 +2,8 @@ from .node import Node
 from utilities import hamming_distance
 
 import numpy as np
+import scipy.stats as stats
+from scipy.integrate import quad
 from queue import PriorityQueue
 from numbers import Number
 
@@ -96,11 +98,24 @@ class StackDecoder:
         """Returns the last block of the decoded bit sequence."""
         return self.decode_node(received_sequence).input_block
 
-    def E0(self, rho):
+    def E0(self, rho, simple_bound=False):
         # Compared with (3b) of the tree code paper, 1 = log 2 and the summation
         # have been simplified away
-        p = self.p
-        return rho - (1 + rho) * np.log2(p**(1/(1+rho)) + (1 - p)**(1/(1+rho)))
+        if hasattr(self, 'p') or simple_bound:
+            if hasattr(self, 'p'):
+                p = self.p
+            else:
+                # Lower bound on E0 (slicing, i.e. convert AWGN → BSC at a loss)
+                # Bit flip (sign crossover) if noise is larger than 1
+                p = stats.norm(0, 1 / self.SNR).sf(1)
+            return rho - (1 + rho) * np.log2(
+                    p**(1/(1+rho)) + (1 - p)**(1/(1+rho)))
+        else:
+            # From an example in the tree code paper
+            w = stats.norm(0, 1 / self.SNR).pdf
+            return 1 + rho - np.log2(quad(lambda z:
+                    ( w(z - 1)**(1/(1+rho)) + w(z + 1)**(1/(1+rho)) )**(1+rho),
+                    -np.inf, np.inf)[0])
 
     class Node(Node):
         """A node with a comparison operator for use in a min-priority queue."""
