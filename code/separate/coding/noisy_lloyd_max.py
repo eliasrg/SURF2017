@@ -2,6 +2,9 @@ from . import source
 from .convolutional import stack
 from utilities import to_column_vector
 
+import numpy as np
+import warnings
+
 class Encoder:
     def __init__(self, sim, tracker, convolutional_code):
         self.sim = sim
@@ -44,6 +47,8 @@ class Decoder:
             # BSC(p)
             self.stack_decoder = stack.StackDecoder(
                     self.convolutional_code, p=self.sim.params.p)
+
+        self.error_exponent_sanity_check()
 
     def decode(self, *msg):
         """The first return value is the decoded plant state estimate.
@@ -93,6 +98,15 @@ class Decoder:
     def source_decode(self, i):
         self.source_decoder_history.append(self.source_decoder.clone())
         return self.source_decoder.decode(i)[0]
+
+    def error_exponent_sanity_check(self):
+        EJ = self.stack_decoder.EJ()
+        alpha = self.sim.params.alpha
+        if EJ < 2 * np.log2(alpha):
+            warnings.warn((
+                "EJ = {:.4f} is less than 2 log2 α = {:.4f}. "
+                + "Expect control to fail."
+                ).format(EJ, 2 * np.log2(alpha)), RuntimeWarning)
 
 
 def int_to_bits(i):
