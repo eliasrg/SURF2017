@@ -116,7 +116,7 @@ class Simulation:
 
     def measure_SDR(self):
         assert self.params.analog
-        N_ITERATIONS = 1000
+        N_ITERATIONS = 10000
         signal_distr = gaussian(1)
         channel = self.channel.clone()
         distortions = []
