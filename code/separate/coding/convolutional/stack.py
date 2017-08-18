@@ -7,6 +7,7 @@ from scipy.integrate import quad
 from scipy.optimize import minimize
 from queue import PriorityQueue
 from numbers import Number
+import warnings
 
 class StackDecoder:
     """Decodes a convolutional code transmitted over a BSC.
@@ -31,6 +32,8 @@ class StackDecoder:
         else:
             raise ValueError(
                     "{} is not 'R', 'E0' or a number".format(bias_mode))
+
+        self.bias_sanity_check()
 
         self.nodes = PriorityQueue()
         root = StackDecoder.Node(self.code)
@@ -124,6 +127,14 @@ class StackDecoder:
         f = lambda rho: rho / (1 + rho) * (
                 self.E0(rho) + self.bias - (1 + rho) * self.code.rate())
         return -minimize(lambda rho: -f(rho), 0.5, bounds=[[0,1]]).fun[0]
+
+    def bias_sanity_check(self):
+        E0 = self.E0(1)
+        if self.bias > E0:
+            warnings.warn((
+                "Bias {:.4f} is larger than E0 = {:.4f}. "
+                + "Expect high decoding time complexity."
+                ).format(self.bias, E0), RuntimeWarning)
 
     class Node(Node):
         """A node with a comparison operator for use in a min-priority queue."""
