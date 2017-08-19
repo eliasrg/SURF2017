@@ -1,5 +1,6 @@
 from .node import Node
 from utilities import hamming_distance, memoized
+from distributions import gaussian
 
 import numpy as np
 import scipy.stats as stats
@@ -111,12 +112,12 @@ class StackDecoder:
             else:
                 # Lower bound on E0 (slicing, i.e. convert AWGN → BSC at a loss)
                 # Bit flip (sign crossover) if noise is larger than 1
-                p = stats.norm(0, 1 / self.SNR).sf(1)
+                p = gaussian(1 / self.SNR).sf(1)
             return rho - (1 + rho) * np.log2(
                     p**(1/(1+rho)) + (1 - p)**(1/(1+rho)))
         else:
             # From an example in the tree code paper
-            w = stats.norm(0, 1 / self.SNR).pdf
+            w = gaussian(1 / self.SNR).pdf
             return 1 + rho - np.log2(quad(lambda z:
                     ( w(z - 1)**(1/(1+rho)) + w(z + 1)**(1/(1+rho)) )**(1+rho),
                     -np.inf, np.inf)[0])
