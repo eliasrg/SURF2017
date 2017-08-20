@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from scipy.integrate import quad
 
 from simulation import Simulation, Parameters
+from measurements import Measurement
 import separate.coding.source.lloyd_max as lm
 from separate.coding.convolutional import ConvolutionalCode, Node, \
         NaiveMLDecoder, StackDecoder
@@ -19,9 +20,9 @@ from joint.coding import SpiralMap
 n_runs = 1 << 0
 T = 1 << 7
 
-LQG_average_trajectories = []
+average_measurements = []
 def simulate(plots=False):
-    global params, sim, LQG_average_trajectories
+    global params, sim, average_measurements
     for SNR in [2]: # SNR irrelevant for an IntegerChannel
         print("SNR = {}".format(SNR))
         params = Parameters(
@@ -48,12 +49,10 @@ def simulate(plots=False):
         params.setBlocklength(2)
         params.setScheme('separate')
 
-        LQG_trajectories = []
+        measurements = []
         for i in range(n_runs):
             sim = Simulation(params)
-            # LQG_trajectory = tuple(sim.LQG.evaluate(t)
-            #                        for t in sim.simulate(T))
-            LQG_trajectory = []
+            measurement = Measurement(params)
             if plots:
                 tracker = sim.encoder.get_tracker()
                 plot_lloyd_max(tracker.distr,
@@ -62,7 +61,7 @@ def simulate(plots=False):
             try:
                 for t in sim.simulate(T):
                     print("Run {:d}, t = {:d}".format(i, t))
-                    LQG_trajectory.append(sim.LQG.evaluate(t))
+                    measurement.record(sim)
                     if plots:
                         tracker = sim.encoder.get_tracker()
                         plot_lloyd_max_tracker(tracker.distr,
@@ -71,37 +70,21 @@ def simulate(plots=False):
                                 tracker, x_hit=sim.plant.x)
             except KeyboardInterrupt:
                 print("Keyboard interrupt!")
-            LQG_trajectories.append(LQG_trajectory)
+            measurements.append(measurement)
 
-        LQG_slices = list(zip(*LQG_trajectories))
-        LQG_average_trajectory = np.array(list(map(np.mean, LQG_slices)))
-        LQG_average_trajectories.append(LQG_average_trajectory)
+        average_measurements.append(Measurement.average(measurements))
         print("  Average power over channel: {:.4f}".format(
             sim.channel.average_power()))
 
     globals().update(params.all()) # Bring parameters into scope
 
 def plot():
-    plot = plt.figure()
+    figure = plt.figure()
 
-    for LQG_average_trajectory in LQG_average_trajectories:
-        # Plot in dB
-        plt.xlabel("Time [steps]")
-        plt.ylabel("Average LQR [dB]")
-        plt.figure(plot.number)
-        plt.plot(list(islice(range(0, T + 1), len(LQG_average_trajectory))),
-            10 * np.log10(LQG_average_trajectory))
-
-    if params.analog:
-        plt.plot((1, T),
-            10 * np.log10(params.LQR_inf_lower_bound()) * np.ones(2), 'r--')
-        if hasattr(params, 'SDR0'):
-            plt.plot((1, T),
-                    10 * np.log10(params.LQR_inf_upper_bound()) * np.ones(2),
-                    'g--')
-
-    plt.ylim(0, 50)
-    plt.grid()
+    for average_measurement in average_measurements:
+        plt.figure(figure.number)
+        average_measurement.plot_setup()
+        average_measurement.plot_LQG()
 
 
 def plot_lloyd_max(distr, enc, dec, x_hit=None):
