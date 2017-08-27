@@ -178,7 +178,7 @@ class Parameters:
             elif (self.KC, self.KS) == (2, 1):
                 # TODO Allow these parameters to be chosen
                 self.c_reg = np.sqrt(2)
-                self.omega = 1
+                self.omega = 0.5
                 self.SDR0 = Simulation(self).measure_SDR()
 
         elif scheme == 'separate':
