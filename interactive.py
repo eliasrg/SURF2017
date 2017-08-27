@@ -104,6 +104,24 @@ def test_update(i=4):
     plot_lloyd_max(tracker.distr, tracker.lm_encoder, tracker.lm_decoder)
 
 
+def plot_compare():
+    jscc = Measurement.load('data/joint/alpha_1.001_SNR_2_KC_32-runs.p')
+    separate1 = Measurement.load('data/separate/alpha_1.001_SNR_2_KC_2--1.p')
+    separate2 = Measurement.load('data/separate/alpha_1.001_SNR_2_KC_2--2.p')
+    plt.figure()
+
+    jscc.plot_setup()
+
+    # Plot in the right order so that the legend reads top-down
+    separate1.plot_LQG("Separation, single run")
+    separate2.plot_LQG("Separation, single run")
+    jscc.plot_LQG("Spiral JSCC, 32-run average")
+    jscc.plot_bounds(upper_label="Theoretical prediction (spiral JSCC)")
+    plt.legend()
+    plt.text(25, 5, jscc.params.text_description(),
+            bbox={'facecolor': 'white', 'edgecolor': 'gray'})
+
+
 def show(delay=0):
     if delay != 0:
         from time import sleep
