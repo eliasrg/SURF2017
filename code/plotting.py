@@ -42,6 +42,11 @@ def plot_lloyd_max_tracker(distr, enc, dec, tracker, x_hit=None):
 def plot_spiral(spiral_map):
     s = np.linspace(0, 7, num=1000)
 
+    plt.rcParams['lines.linewidth'] = 5
+
+    plt.plot(spiral_map.c * s, spiral_map.c * s, '--', color='orange')
+    plt.plot(-spiral_map.c * s, -spiral_map.c * s, '--', color='lightblue')
+
     # Positive s
     x, y = list(zip(*map(spiral_map.encode, s)))
     plt.plot(x, y, 'orange')
@@ -53,10 +58,11 @@ def plot_spiral(spiral_map):
     plt.axis('square')
     plt.axis([-22, 22, -22, 22])
 
-def plot_spiral_decode():
-    spiral_map = SpiralMap(2, 3)
+    plt.xlabel("First channel use ($a_1$)", fontsize=25)
+    plt.ylabel("Second channel use ($a_2$)", fontsize=25)
+
+def plot_spiral_decode(spiral_map=SpiralMap(2, 3)):
     fig = plt.figure()
-    plt.title("Closest point on Archimedean bi-spiral")
     plot_spiral(spiral_map)
 
     while True:

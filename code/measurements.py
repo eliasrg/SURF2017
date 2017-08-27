@@ -39,34 +39,36 @@ class Measurement:
         return new
 
 
-    def plot(self):
+    def plot(self, label=None):
         self.plot_setup()
-        self.plot_LQG()
+        self.plot_LQG(label=label)
+        self.plot_bounds()
 
     def plot_setup(self):
         plt.xlabel("Time [steps]")
-
-        plt.ylim(-10, 50)
         plt.grid()
 
     def plot_x(self):
         plt.plot(list(range(len(self.x))), self.x)
-        plt.ylabel("Plant state [dB]")
+        plt.ylabel("Plant state")
 
-    def plot_LQG(self):
+    def plot_LQG(self, label=None):
+        plt.plot(list(range(len(self.LQG))), 10 * np.log10(self.LQG),
+                label=label)
+        plt.ylabel("Control cost [dB]")
+
+    def plot_bounds(self, lower_label="Theoretical lower bound",
+            upper_label="Theoretical prediction"):
         params = self.params
-
-        plt.plot(list(range(len(self.LQG))), 10 * np.log10(self.LQG))
-        plt.ylabel("Average LQG [dB]")
-
-        # Lower bound
-        if params.analog:
-            plt.plot((1, len(self.LQG)),
-                    10 * np.log10(params.LQR_inf_lower_bound()) * np.ones(2),
-                    'r--')
 
         # Upper bound
         if params.analog and hasattr(params, 'SDR0'):
             plt.plot((1, len(self.LQG)),
                     10 * np.log10(params.LQR_inf_upper_bound()) * np.ones(2),
-                    'g--')
+                    'g--', label=upper_label)
+
+        # Lower bound
+        if params.analog:
+            plt.plot((1, len(self.LQG)),
+                    10 * np.log10(params.LQR_inf_lower_bound()) * np.ones(2),
+                    'r--', label=lower_label)
