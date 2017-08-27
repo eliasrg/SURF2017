@@ -1,7 +1,7 @@
 from scipy.stats import bernoulli
 
 class Plant:
-    """The system {x(t+1) = a x(t) + w(t) + u(t); y(t) = x(t) + v(t)}."""
+    """The system {x(t+1) = α x(t) + w(t) + u(t); y(t) = x(t) + v(t)}."""
     def __init__(self, alpha, x1_distr, w_distr, v_distr):
         self.alpha = alpha
         self.x1_distr = x1_distr
