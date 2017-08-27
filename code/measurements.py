@@ -7,10 +7,16 @@ class Measurement:
     def __init__(self, params):
         self.params = params
         self.x = []
+        self.w = []
+        self.v = []
+        self.noise = []
         self.LQG = []
 
     def record(self, sim):
         self.x.append(sim.plant.x)
+        self.w.append(sim.plant.w)
+        self.v.append(sim.plant.v)
+        self.noise.append(sim.channel.last_noise)
         self.LQG.append(sim.LQG.evaluate(sim.t))
 
     def save(self, filename):
@@ -30,10 +36,14 @@ class Measurement:
         new = Measurement(measurements[0].params)
 
         def average_sequence(sequences):
+            sequences = [np.array(sequence).flatten() for sequence in sequences]
             slices = list(zip(*sequences))
             return np.array(list(map(np.mean, slices)))
 
         new.x = average_sequence(m.x for m in measurements)
+        new.w = average_sequence(m.w for m in measurements)
+        new.v = average_sequence(m.v for m in measurements)
+        new.noise = average_sequence(m.noise for m in measurements)
         new.LQG = average_sequence(m.LQG for m in measurements)
 
         return new

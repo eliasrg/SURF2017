@@ -8,12 +8,18 @@ class Plant:
         self.w_distr = w_distr
         self.v_distr = v_distr
 
+        self.w = self.w_distr.rvs()
+        self.v = self.v_distr.rvs()
+
         self.x = x1_distr.rvs()
-        self.y = self.x + self.v_distr.rvs()
+        self.y = self.x + self.v
 
     def step(self, u):
-        self.x = self.alpha * self.x + self.w_distr.rvs() + u
-        self.y = self.x + self.v_distr.rvs()
+        self.w = self.w_distr.rvs()
+        self.v = self.v_distr.rvs()
+
+        self.x = self.alpha * self.x + self.w + u
+        self.y = self.x + self.v
 
 
 class RealChannel:
@@ -29,7 +35,13 @@ class RealChannel:
             self.total_power += a**2
         self.uses += 1
 
-        return (a + self.n_distr.rvs() for a in msg)
+        self.last_noise = []
+        def get_noise():
+            n = self.n_distr.rvs()
+            self.last_noise.append(n)
+            return n
+
+        return (a + get_noise() for a in msg)
 
     def average_power(self):
         return self.total_power / self.uses
@@ -42,6 +54,7 @@ class IntegerChannel:
     Transmits integers in the range [0, 2^R - 1]."""
     def __init__(self, n_symbols):
         self.n_symbols = n_symbols # 2^R where R is the (fixed) rate
+        self.last_noise = None
 
     def transmit(self, msg):
         """msg is an array/list of integers no longer than 2^R."""
@@ -64,7 +77,14 @@ class BinarySymmetricChannel:
     def transmit(self, msg):
         """msg is an array/list of bits (integers that are 1 or 0)."""
         assert all(x in [0,1] for x in msg)
-        return (x ^ self.noise_distr.rvs() for x in msg)
+
+        self.last_noise = []
+        def get_noise():
+            n = self.noise_distr.rvs()
+            self.last_noise.append(n)
+            return n
+
+        return (x ^ get_noise() for x in msg)
 
     def average_power(self):
         return float('nan')
