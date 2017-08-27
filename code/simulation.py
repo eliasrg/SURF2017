@@ -201,6 +201,14 @@ class Parameters:
         return {k: v for k, v in inspect.getmembers(self)
                 if not k.startswith('__')}
 
+    def text_description(self):
+        return \
+"""Plant: α = {}
+Noise: W = {}, V = {}, SNR = {}
+Cost: Q = {}, R = {}, F = {}
+Channel uses per sample: {}""".format(self.alpha, self.W, self.V, self.SNR,
+        self.Q, self.R, self.F, self.KC)
+
     # Statically known parameters computed recursively using memoization
 
     @memoized
