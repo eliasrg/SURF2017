@@ -1,3 +1,6 @@
+# Copyright (c) 2017 Elias Riedel Gårding
+# Licensed under the MIT License
+
 from utilities import full_rank
 
 import numpy as np

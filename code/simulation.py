@@ -1,3 +1,6 @@
+# Copyright (c) 2017 Elias Riedel Gårding
+# Licensed under the MIT License
+
 from distributions import gaussian
 from system import \
         Plant, RealChannel, IntegerChannel, BinarySymmetricChannel, LQGCost

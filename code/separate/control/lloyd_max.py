@@ -1,3 +1,6 @@
+# Copyright (c) 2017 Elias Riedel Gårding
+# Licensed under the MIT License
+
 class Observer:
     """The observer/transmitter described in the Lloyd-Max paper."""
     def __init__(self, sim):

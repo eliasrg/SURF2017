@@ -1,3 +1,6 @@
+# Copyright (c) 2017 Elias Riedel Gårding
+# Licensed under the MIT License
+
 import numpy as np
 from numpy.linalg import matrix_rank
 

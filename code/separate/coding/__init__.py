@@ -1,3 +1,6 @@
+# Copyright (c) 2017 Elias Riedel Gårding
+# Licensed under the MIT License
+
 from . import noisy_lloyd_max
 
 class Encoder:

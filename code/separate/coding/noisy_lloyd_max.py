@@ -1,3 +1,6 @@
+# Copyright (c) 2017 Elias Riedel Gårding
+# Licensed under the MIT License
+
 from . import source
 from .convolutional import stack
 from utilities import to_column_vector

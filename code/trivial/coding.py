@@ -1,3 +1,6 @@
+# Copyright (c) 2017 Elias Riedel Gårding
+# Licensed under the MIT License
+
 class Encoder:
     """Sends a message without encoding it over the channel."""
     def __init__(self, sim):

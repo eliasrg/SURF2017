@@ -1,3 +1,6 @@
+# Copyright (c) 2017 Elias Riedel Gårding
+# Licensed under the MIT License
+
 import matplotlib.pyplot as plt
 import numpy as np
 from joint.coding import SpiralMap

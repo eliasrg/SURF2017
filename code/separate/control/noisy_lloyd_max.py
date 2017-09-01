@@ -1,3 +1,6 @@
+# Copyright (c) 2017 Elias Riedel Gårding
+# Licensed under the MIT License
+
 class Observer:
     """Calculates an estimate of the plant state as if the channel
     were noiseless and transmits it to the controller."""

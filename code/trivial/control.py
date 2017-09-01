@@ -1,3 +1,6 @@
+# Copyright (c) 2017 Elias Riedel Gårding
+# Licensed under the MIT License
+
 class Observer:
     """Observes the plant and transmits the observation without preprocessing.
     Note: Currently violates the power constraint."""

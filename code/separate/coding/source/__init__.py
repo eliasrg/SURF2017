@@ -1,3 +1,6 @@
+# Copyright (c) 2017 Elias Riedel Gårding
+# Licensed under the MIT License
+
 from distributions import gaussian, Custom
 from . import lloyd_max
 

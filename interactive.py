@@ -1,3 +1,6 @@
+# Copyright (c) 2017 Elias Riedel Gårding
+# Licensed under the MIT License
+
 import sys, os
 sys.path.insert(0,
         os.path.abspath(os.path.join(os.path.dirname(__file__), 'code')))
