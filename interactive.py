@@ -91,6 +91,7 @@ def plot():
         plt.figure(figure.number)
         average_measurement.plot_setup()
         average_measurement.plot_LQG()
+        average_measurement.plot_bounds()
 
 
 def generate_plot_lloyd_max(n_levels):
