@@ -24,7 +24,9 @@ class Simulation:
         self.params = params
 
         self.plant = Plant(params.alpha, gaussian(params.W),
-                gaussian(params.W), gaussian(params.V))
+                gaussian(params.W), gaussian(params.V),
+                getattr(params, 'w_sequence', None),
+                getattr(params, 'v_sequence', None))
         self.LQG = LQGCost(self.plant, params.Q, params.R, params.F)
 
         # Globally known data
@@ -35,7 +37,8 @@ class Simulation:
             # x_est_r[t1, t2]: receiver estimate of x(t1) at time t2
             self.globals.x_est_r = dict()
 
-            self.channel = RealChannel(gaussian(1 / params.SNR))
+            self.channel = RealChannel(gaussian(1 / params.SNR),
+                    getattr(params, 'n_sequence', None))
         elif params.p == 0:
             self.channel = IntegerChannel(2**params.quantizer_bits)
         else:

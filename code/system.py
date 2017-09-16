@@ -5,30 +5,46 @@ from scipy.stats import bernoulli
 
 class Plant:
     """The system {x(t+1) = α x(t) + w(t) + u(t); y(t) = x(t) + v(t)}."""
-    def __init__(self, alpha, x1_distr, w_distr, v_distr):
+    def __init__(self, alpha, x1_distr, w_distr, v_distr,
+            w_sequence=None, v_sequence=None, x1=None):
         self.alpha = alpha
         self.x1_distr = x1_distr
         self.w_distr = w_distr
         self.v_distr = v_distr
+        self.w_sequence = w_sequence
+        self.v_sequence = v_sequence
 
-        self.w = self.w_distr.rvs()
-        self.v = self.v_distr.rvs()
+        self.w = self.get_w()
+        self.v = self.get_v()
 
-        self.x = x1_distr.rvs()
+        self.x = x1_distr.rvs() if x1 is None else x1
         self.y = self.x + self.v
 
     def step(self, u):
-        self.w = self.w_distr.rvs()
-        self.v = self.v_distr.rvs()
+        self.w = self.get_w()
+        self.v = self.get_v()
 
         self.x = self.alpha * self.x + self.w + u
         self.y = self.x + self.v
 
+    def get_w(self):
+        if self.w_sequence is None:
+            return self.w_distr.rvs()
+        else:
+            return self.w_sequence.pop(0)
+
+    def get_v(self):
+        if self.v_sequence is None:
+            return self.v_distr.rvs()
+        else:
+            return self.v_sequence.pop(0)
+
 
 class RealChannel:
     """Transmits real numbers with additive noise."""
-    def __init__(self, n_distr):
+    def __init__(self, n_distr, n_sequence=None):
         self.n_distr = n_distr
+        self.n_sequence = n_sequence
         self.total_power = 0
         self.uses = 0
 
@@ -40,7 +56,8 @@ class RealChannel:
 
         self.last_noise = []
         def get_noise():
-            n = self.n_distr.rvs()
+            n = self.n_distr.rvs() if self.n_sequence is None \
+                    else self.n_sequence.pop(0)
             self.last_noise.append(n)
             return n
 
