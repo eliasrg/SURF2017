@@ -6,18 +6,18 @@ class Observer:
     were noiseless and transmits it to the controller."""
     def __init__(self, sim):
         self.sim = sim
-        self.x_u_ideal = DeterministicPlant(sim.params.alpha)
-        self.x_u_actual = DeterministicPlant(sim.params.alpha)
+        self.x_u_ideal_minus_actual = DeterministicPlant(sim.params.alpha)
+        self.u_ideal_previous = 0
 
     def observe(self, t, y):
         # Update the controlled part of the actual plant
         u_actual_previous = self.sim.globals.u[t-1] if t > 1 else 0
-        self.x_u_actual.step(u_actual_previous)
+        self.x_u_ideal_minus_actual.step(
+                self.u_ideal_previous - u_actual_previous)
 
         # Calculate the ideal (noiseless) estimate
         x_est = y # TODO take observation noise into account
-        x_est_uncontrolled = x_est - self.x_u_actual.value
-        x_est_ideal = x_est_uncontrolled + self.x_u_ideal.value
+        x_est_ideal = x_est + self.x_u_ideal_minus_actual.value
 
         # Quantize it TODO restructure so quantization only happens once?
         tracker = self.sim.encoder.get_tracker()
@@ -25,8 +25,7 @@ class Observer:
                 tracker.lm_decoder.decode(tracker.lm_encoder.encode(x_est_ideal))
 
         # Update the controlled part of the ideal plant
-        u_ideal = -self.sim.params.L(t) * x_est_ideal_quantized
-        self.x_u_ideal.step(u_ideal)
+        self.u_ideal_previous = -self.sim.params.L(t) * x_est_ideal_quantized
 
         # Pass to the source and channel encoders
         return (x_est_ideal,)
