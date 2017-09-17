@@ -26,72 +26,71 @@ from joint.coding import SpiralMap
 n_runs = 1 << 0
 T = 1 << 7
 
-average_measurements = []
+measurements = []
 def simulate(plots=False):
-    global params, sim, average_measurements
-    for SNR in [2]: # SNR irrelevant for an IntegerChannel
-        print("SNR = {}".format(SNR))
-        params = Parameters(
-                T = T,
-                alpha = 1.5,
-                W = 1, V = 0, # Lloyd-Max paper assumes no observation noise
-                Q = 1, R = 1, F = 1)
+    global params, sim, measurements
+    SNR = 2
+    print("SNR = {}".format(SNR))
+    params = Parameters(
+            T = T,
+            alpha = 1.5,
+            W = 1, V = 0, # Lloyd-Max paper assumes no observation noise
+            Q = 1, R = 1, F = 1)
 
-        # params.setRates(KC = 2, KS = 1)
-        # params.setAnalog(SNR)
-        # params.setScheme('joint')
-        # print("SDR0 = {}".format(params.SDR0))
+    # params.setRates(KC = 1, KS = 1)
+    # params.setAnalog(SNR)
+    # params.setScheme('joint')
+    # print("SDR0 = {}".format(params.SDR0))
 
-        # params.setDigital(quantizer_bits = 1)
-        # params.setScheme('lloyd-max')
+    # params.setDigital(quantizer_bits = 1)
+    # params.setScheme('lloyd-max')
 
-        # params.setDigital(quantizer_bits = 1, p = 0.1)
-        # params.setBlocklength(3)
-        # params.setScheme('noisy-lloyd-max')
+    # params.setDigital(quantizer_bits = 1, p = 0.1)
+    # params.setBlocklength(3)
+    # params.setScheme('noisy-lloyd-max')
 
-        params.setRates(KC = 2, KS = 1)
-        params.setAnalog(SNR)
-        params.quantizer_bits = 1
-        params.setBlocklength(2)
-        params.setScheme('separate')
+    params.setRates(KC = 2, KS = 1)
+    params.setAnalog(SNR)
+    params.quantizer_bits = 1
+    params.setBlocklength(2)
+    params.setScheme('separate')
 
-        measurements = []
-        for i in range(n_runs):
-            sim = Simulation(params)
-            measurement = Measurement(params)
-            if plots:
-                tracker = sim.encoder.get_tracker()
-                plot_lloyd_max(tracker.distr,
-                        tracker.lm_encoder,
-                        tracker.lm_decoder, x_hit=sim.plant.x)
-            try:
-                for t in sim.simulate(T):
-                    print("Run {:d}, t = {:d}".format(i, t))
-                    measurement.record(sim)
-                    if plots:
-                        tracker = sim.encoder.get_tracker()
-                        plot_lloyd_max_tracker(tracker.distr,
-                                tracker.lm_encoder,
-                                tracker.lm_decoder,
-                                tracker, x_hit=sim.plant.x)
-            except KeyboardInterrupt:
-                print("Keyboard interrupt!")
-            measurements.append(measurement)
+    for i in range(n_runs):
+        sim = Simulation(params)
+        measurement = Measurement(params)
+        if plots:
+            tracker = sim.encoder.get_tracker()
+            plot_lloyd_max(tracker.distr,
+                    tracker.lm_encoder,
+                    tracker.lm_decoder, x_hit=sim.plant.x)
+        try:
+            for t in sim.simulate(T):
+                print("Run {:d}, t = {:d}".format(i, t))
+                measurement.record(sim)
+                if plots:
+                    tracker = sim.encoder.get_tracker()
+                    plot_lloyd_max_tracker(tracker.distr,
+                            tracker.lm_encoder,
+                            tracker.lm_decoder,
+                            tracker, x_hit=sim.plant.x)
+        except KeyboardInterrupt:
+            print("Keyboard interrupt!")
+        measurements.append(measurement)
 
-        average_measurements.append(Measurement.average(measurements))
         print("  Average power over channel: {:.4f}".format(
             sim.channel.average_power()))
 
     globals().update(params.all()) # Bring parameters into scope
 
-def plot():
+def plot(average=True):
     figure = plt.figure()
 
-    for average_measurement in average_measurements:
+    for measurement in measurements if not average \
+            else [Measurement.average(measurements)]:
         plt.figure(figure.number)
-        average_measurement.plot_setup()
-        average_measurement.plot_LQG()
-        average_measurement.plot_bounds()
+        measurement.plot_setup()
+        measurement.plot_LQG()
+        measurement.plot_bounds()
 
 
 def generate_plot_lloyd_max(n_levels):
