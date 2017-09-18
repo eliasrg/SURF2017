@@ -74,6 +74,8 @@ class Measurement:
         self.plot_setup()
         self.plot_LQG(label=label)
         self.plot_bounds()
+        self.plot_correctly_decoded()
+        plt.legend()
 
     def plot_setup(self):
         plt.xlabel("Time [steps]")
@@ -103,3 +105,19 @@ class Measurement:
             plt.plot((1, len(self.LQG)),
                     10 * np.log10(params.LQR_inf_lower_bound()) * np.ones(2),
                     'r--', label=lower_label)
+
+    def plot_correctly_decoded(self):
+        # Find intervals of consecutive Trues
+        intervals = []
+        start = None
+        for (t, good) in enumerate(self.correctly_decoded, 1):
+            if not start and not good:
+                start = t
+            elif start and (good or t == len(self.correctly_decoded)):
+                intervals.append((start, t))
+                start = None
+
+        for i, (start, stop) in enumerate(intervals):
+            print("({}, {})".format(start, stop))
+            plt.plot([start, stop], [0, 0], color='purple', linewidth=5,
+                    label="Decoding errors" if i == 0 else None)
