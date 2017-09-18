@@ -33,6 +33,9 @@ class Encoder:
     def get_tracker(self):
         return self.source_encoder.tracker
 
+    def get_bits_history(self):
+        return self.bits_history
+
 class Decoder:
     """Combined source and channel encoder."""
     def __init__(self, sim, tracker, convolutional_code):

@@ -21,4 +21,7 @@ class Encoder:
     def get_tracker(self):
         return self.noisy_lloyd_max_encoder.get_tracker()
 
+    def get_bits_history(self):
+        return self.noisy_lloyd_max_encoder.get_bits_history()
+
 Decoder = noisy_lloyd_max.Decoder

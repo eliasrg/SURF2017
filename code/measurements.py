@@ -15,12 +15,30 @@ class Measurement:
         self.noise = []
         self.LQG = []
 
+        if params.scheme in ['noisy_lloyd_max', 'separate']:
+            # Quantization index translated into bits
+            self.bits = []
+            # Entire history believed by the decoder (at each step)
+            self.decoded_bits_history = []
+            self.correctly_decoded = []
+
     def record(self, sim):
         self.x.append(sim.plant.x)
         self.w.append(sim.plant.w)
         self.v.append(sim.plant.v)
         self.noise.append(sim.channel.last_noise)
         self.LQG.append(sim.LQG.evaluate(sim.t))
+
+        if hasattr(self, 'bits'):
+            assert hasattr(sim.encoder, 'get_bits_history')
+            self.bits = sim.encoder.get_bits_history()
+            self.decoded_bits_history.append(list(
+                    sim.decoder.stack_decoder.first_nodes[-1].input_history()))
+            # print("Actual:  {}\nDecoded: {}".format(
+            #     actual_bits_history, decoded_bits_history))
+            self.correctly_decoded.append(
+                    self.bits == self.decoded_bits_history[-1])
+            print("Correctly decoded: {}".format(self.correctly_decoded[-1]))
 
     def save(self, filename):
         with open(filename, 'wb') as f:
