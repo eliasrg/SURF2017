@@ -2,6 +2,7 @@
 # Licensed under the MIT License
 
 from itertools import islice
+from types import SimpleNamespace
 import matplotlib.pyplot as plt
 import numpy as np
 import pickle
@@ -67,6 +68,16 @@ class Measurement:
         new.LQG = average_sequence(m.LQG for m in measurements)
 
         return new
+
+    def get_noise_record(self):
+        noise = SimpleNamespace()
+
+        noise.x1 = self.x[0]
+        noise.w_sequence = self.w[:]
+        noise.v_sequence = self.v[:]
+        noise.n_sequence = list(np.array(self.noise).flatten())
+
+        return noise
 
 
     def plot(self, label=None):

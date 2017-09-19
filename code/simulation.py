@@ -20,14 +20,17 @@ import numpy as np
 import inspect
 
 class Simulation:
-    def __init__(self, params):
+    def __init__(self, params, noise=None):
+        if noise is None: noise = SimpleNamespace()
+
         self.params = params
+        self.noise = noise
 
         self.plant = Plant(params.alpha, gaussian(params.W),
                 gaussian(params.W), gaussian(params.V),
-                getattr(params, 'w_sequence', None),
-                getattr(params, 'v_sequence', None),
-                getattr(params, 'x1', None))
+                getattr(noise, 'w_sequence', None),
+                getattr(noise, 'v_sequence', None),
+                getattr(noise, 'x1', None))
         self.LQG = LQGCost(self.plant, params.Q, params.R, params.F)
 
         # Globally known data
@@ -39,7 +42,7 @@ class Simulation:
             self.globals.x_est_r = dict()
 
             self.channel = RealChannel(gaussian(1 / params.SNR),
-                    getattr(params, 'n_sequence', None))
+                    getattr(noise, 'n_sequence', None))
         elif params.p == 0:
             self.channel = IntegerChannel(2**params.quantizer_bits)
         else:
