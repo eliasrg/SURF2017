@@ -26,7 +26,8 @@ class Simulation:
         self.plant = Plant(params.alpha, gaussian(params.W),
                 gaussian(params.W), gaussian(params.V),
                 getattr(params, 'w_sequence', None),
-                getattr(params, 'v_sequence', None))
+                getattr(params, 'v_sequence', None),
+                getattr(params, 'x1', None))
         self.LQG = LQGCost(self.plant, params.Q, params.R, params.F)
 
         # Globally known data
