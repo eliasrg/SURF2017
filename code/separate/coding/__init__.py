@@ -24,4 +24,7 @@ class Encoder:
     def get_bits_history(self):
         return self.noisy_lloyd_max_encoder.get_bits_history()
 
+    def get_convolutional_code(self):
+        return self.noisy_lloyd_max_encoder.get_convolutional_code()
+
 Decoder = noisy_lloyd_max.Decoder
