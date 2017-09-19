@@ -65,7 +65,6 @@ def simulate(plots=False):
                     tracker.lm_decoder, x_hit=sim.plant.x)
         try:
             for t in sim.simulate(T):
-                print("Run {:d}, t = {:d}".format(i, t))
                 measurement.record(sim)
                 if plots:
                     tracker = sim.encoder.get_tracker()
@@ -73,6 +72,7 @@ def simulate(plots=False):
                             tracker.lm_encoder,
                             tracker.lm_decoder,
                             tracker, x_hit=sim.plant.x)
+                print("Run {:d}, t = {:d} done".format(i, t))
         except KeyboardInterrupt:
             print("Keyboard interrupt!")
         measurements.append(measurement)
