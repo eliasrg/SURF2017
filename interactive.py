@@ -48,12 +48,14 @@ def simulate(plots=False):
     # params.setDigital(quantizer_bits = 1, p = 0.1)
     # params.setBlocklength(3)
     # params.setScheme('noisy-lloyd-max')
+    # params.set_random_code()
 
     params.setRates(KC = 2, KS = 1)
     params.setAnalog(SNR)
     params.quantizer_bits = 1
     params.setBlocklength(2)
     params.setScheme('separate')
+    params.set_random_code()
 
     for i in range(n_runs):
         sim = Simulation(params)

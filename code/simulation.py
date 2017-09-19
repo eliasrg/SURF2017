@@ -71,31 +71,23 @@ class Simulation:
             self.observer = separate.control.noisy_lloyd_max.Observer(self)
             self.controller = separate.control.noisy_lloyd_max.Controller(self)
 
-            self.convolutional_code = \
-                    separate.coding.convolutional.ConvolutionalCode.random_code(
-                    params.code_blocklength, params.quantizer_bits,
-                    params.T - 1)
             self.encoder = separate.coding.noisy_lloyd_max.Encoder(
                     self, separate.coding.source.DistributionTracker(
-                        self, 2**params.quantizer_bits), self.convolutional_code)
+                        self, 2**params.quantizer_bits), params.convolutional_code)
             self.decoder = separate.coding.noisy_lloyd_max.Decoder(
                     self, separate.coding.source.DistributionTracker(
-                        self, 2**params.quantizer_bits), self.convolutional_code)
+                        self, 2**params.quantizer_bits), params.convolutional_code)
 
         elif params.scheme == 'separate':
             self.observer = separate.control.noisy_lloyd_max.Observer(self)
             self.controller = separate.control.noisy_lloyd_max.Controller(self)
 
-            self.convolutional_code = \
-                    separate.coding.convolutional.ConvolutionalCode.random_code(
-                    params.code_blocklength, params.quantizer_bits,
-                    params.T - 1)
             self.encoder = separate.coding.Encoder(
                     self, separate.coding.source.DistributionTracker(
-                        self, 2**params.quantizer_bits), self.convolutional_code)
+                        self, 2**params.quantizer_bits), params.convolutional_code)
             self.decoder = separate.coding.Decoder(
                     self, separate.coding.source.DistributionTracker(
-                        self, 2**params.quantizer_bits), self.convolutional_code)
+                        self, 2**params.quantizer_bits), params.convolutional_code)
 
     def simulate(self, T):
         self.t = 1
@@ -202,6 +194,11 @@ class Parameters:
         else:
             raise ValueError("Unrecognized scheme: {}".format(scheme))
 
+    def set_random_code(self):
+        self.convolutional_code = \
+                separate.coding.convolutional.ConvolutionalCode.random_code(
+                self.code_blocklength, self.quantizer_bits,
+                self.T - 1)
 
     def all(self):
         return {k: v for k, v in inspect.getmembers(self)
