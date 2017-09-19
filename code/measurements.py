@@ -30,7 +30,8 @@ class Measurement:
         self.LQG.append(sim.LQG.evaluate(sim.t))
 
         if hasattr(self, 'bits'):
-            assert hasattr(sim.encoder, 'get_bits_history')
+            self.convolutional_code = sim.encoder.get_convolutional_code()
+
             self.bits = sim.encoder.get_bits_history()
             self.decoded_bits_history.append(list(
                     sim.decoder.stack_decoder.first_nodes[-1].input_history()))
