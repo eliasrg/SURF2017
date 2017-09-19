@@ -26,39 +26,41 @@ from joint.coding import SpiralMap
 n_runs = 1 << 0
 T = 1 << 7
 
+
+SNR = 2
+params = Parameters(
+        T = T,
+        alpha = 1.5,
+        W = 1, V = 0, # Lloyd-Max paper assumes no observation noise
+        Q = 1, R = 1, F = 1)
+
+# params.setRates(KC = 1, KS = 1)
+# params.setAnalog(SNR)
+# params.setScheme('joint')
+# print("SDR0 = {}".format(params.SDR0))
+
+# params.setDigital(quantizer_bits = 1)
+# params.setScheme('lloyd-max')
+
+# params.setDigital(quantizer_bits = 1, p = 0.1)
+# params.setBlocklength(3)
+# params.setScheme('noisy-lloyd-max')
+# params.set_random_code()
+
+params.setRates(KC = 2, KS = 1)
+params.setAnalog(SNR)
+params.quantizer_bits = 1
+params.setBlocklength(2)
+params.setScheme('separate')
+params.set_random_code()
+
+
 measurements = []
-def simulate(plots=False):
-    global params, sim, measurements
-    SNR = 2
-    print("SNR = {}".format(SNR))
-    params = Parameters(
-            T = T,
-            alpha = 1.5,
-            W = 1, V = 0, # Lloyd-Max paper assumes no observation noise
-            Q = 1, R = 1, F = 1)
-
-    # params.setRates(KC = 1, KS = 1)
-    # params.setAnalog(SNR)
-    # params.setScheme('joint')
-    # print("SDR0 = {}".format(params.SDR0))
-
-    # params.setDigital(quantizer_bits = 1)
-    # params.setScheme('lloyd-max')
-
-    # params.setDigital(quantizer_bits = 1, p = 0.1)
-    # params.setBlocklength(3)
-    # params.setScheme('noisy-lloyd-max')
-    # params.set_random_code()
-
-    params.setRates(KC = 2, KS = 1)
-    params.setAnalog(SNR)
-    params.quantizer_bits = 1
-    params.setBlocklength(2)
-    params.setScheme('separate')
-    params.set_random_code()
+def simulate(params=params, noise=None, plots=False):
+    global sim, measurements
 
     for i in range(n_runs):
-        sim = Simulation(params)
+        sim = Simulation(params, noise)
         measurement = Measurement(params)
         if plots:
             tracker = sim.encoder.get_tracker()
