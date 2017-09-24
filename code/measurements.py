@@ -84,7 +84,8 @@ class Measurement:
         self.plot_setup()
         self.plot_LQG(label=label)
         self.plot_bounds()
-        self.plot_correctly_decoded()
+        if hasattr(self, 'correctly_decoded'):
+            self.plot_correctly_decoded()
         plt.legend()
 
     def plot_setup(self):
