@@ -101,7 +101,7 @@ class Measurement:
                 label=label)
         plt.ylabel("Control cost [dB]")
 
-    def plot_bounds(self, lower_label="Theoretical lower bound",
+    def plot_bounds(self, lower_label="Theoretical average lower bound",
             upper_label="Theoretical prediction"):
         params = self.params
 
@@ -109,13 +109,13 @@ class Measurement:
         if params.analog and hasattr(params, 'SDR0'):
             plt.plot((1, len(self.LQG)),
                     10 * np.log10(params.LQR_inf_upper_bound()) * np.ones(2),
-                    'g--', label=upper_label)
+                    '--', label=upper_label)
 
         # Lower bound
         if params.analog:
             plt.plot((1, len(self.LQG)),
                     10 * np.log10(params.LQR_inf_lower_bound()) * np.ones(2),
-                    'r--', label=lower_label)
+                    '--', label=lower_label)
 
     def plot_correctly_decoded(self):
         # Find intervals of consecutive Trues

@@ -61,8 +61,8 @@ def plot_spiral(spiral_map):
     plt.axis('square')
     plt.axis([-22, 22, -22, 22])
 
-    plt.xlabel("First channel use ($a_1$)", fontsize=25)
-    plt.ylabel("Second channel use ($a_2$)", fontsize=25)
+    plt.xlabel("First channel use ($a_{i_t}$)", fontsize=25)
+    plt.ylabel("Second channel use ($a_{i_t + 1}$)", fontsize=25)
 
 def plot_spiral_decode(spiral_map=SpiralMap(2, 3)):
     fig = plt.figure()
