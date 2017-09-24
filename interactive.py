@@ -56,11 +56,11 @@ params.set_random_code()
 
 
 measurements = []
-def simulate(params=params, noise=None, plots=False):
+def simulate(params=params, get_noise_record=lambda: None, plots=False):
     global sim, measurements
 
     for i in range(n_runs):
-        sim = Simulation(params, noise)
+        sim = Simulation(params, get_noise_record())
         measurement = Measurement(params)
         if plots:
             tracker = sim.encoder.get_tracker()
