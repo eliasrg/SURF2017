@@ -8,6 +8,40 @@ import numpy as np
 
 class Constellation:
     """A mapping m: ℤ2^n → ℝ^K."""
+    @classmethod
+    def uniform(cls, n):
+        "Equidistant points (K = 1)."
+
+        # {-(2^n - 1), -(2^n - 3), ..., 2^n - 3, 2^n - 1} (2^n integers)
+        ints = 2 * np.arange(2**n) - (2**n - 1)
+
+        # Normalize
+        points = ints / np.sqrt((ints**2).mean())
+
+        return cls(n, 1, [(p,) for p in points])
+
+    @classmethod
+    def cartesian_product(cls, *constellations, repeat=None):
+        # Cartesian power
+        if repeat is not None:
+            (constellation,) = constellations
+            return cls.cartesian_product(*(repeat * [constellation]))
+
+        if len(constellations) == 1:
+            return constellations[0]
+        else:
+            last = constellations[-1]
+            init = constellations[:-1]
+            inner = cls.cartesian_product(*init)
+
+            for p, q in zip(inner.points, last.points):
+                assert type(p) == type(q) == tuple
+
+            points = [p + q # Concatenation of tuples
+                    for p in inner.points for q in last.points]
+
+            return cls(inner.n + last.n, inner.K + last.K, points)
+
     def __init__(self, n, K, points):
         self.n = n
         self.K = K
