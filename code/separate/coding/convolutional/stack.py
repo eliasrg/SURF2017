@@ -17,14 +17,15 @@ class StackDecoder:
     """Decodes a convolutional code transmitted over a BSC.
     Designed so that decoding incrementally by calling decode on a prefix
     of the received code sequence is efficient."""
-    def __init__(self, code, p=None, SNR=None, bias_mode='R'):
+    def __init__(self, code, p=None, SNR=None, PAM=None, bias_mode='R'):
         """If p is given, assumes BSC(p). If SNR is given, assumes AWGN(SNR)."""
         self.code = code
         if p is not None:
             self.compute_metric_increment = BSC_metric_increment(code.n, p)
         elif SNR is not None:
             self.SNR = SNR
-            self.compute_metric_increment = AWGN_2PAM_metric_increment(SNR)
+            self.compute_metric_increment = AWGN_2PAM_metric_increment(SNR) \
+                    if PAM is None else AWGN_PAM_metric_increment(PAM, SNR)
         else:
             raise ValueError("p or SNR must be given")
 
@@ -147,3 +148,7 @@ def AWGN_2PAM_metric_increment(SNR):
                 for z, c in zip(received, codeword))
 
     return metric_increment
+
+def AWGN_PAM_metric_increment(PAM, SNR):
+    return lambda bias, received, codeword: \
+        PAM.metric_increment(SNR, bias, received, codeword)
