@@ -21,9 +21,10 @@ class StackDecoder:
         """If p is given, assumes BSC(p). If SNR is given, assumes AWGN(SNR)."""
         self.code = code
         if p is not None:
-            self.p = p
+            self.compute_metric_increment = BSC_metric_increment(code.n, p)
         elif SNR is not None:
             self.SNR = SNR
+            self.compute_metric_increment = AWGN_2PAM_metric_increment(SNR)
         else:
             raise ValueError("p or SNR must be given")
 
@@ -49,34 +50,8 @@ class StackDecoder:
 
     def extend(self, node, received):
         for child in node.extend():
-            # Calculate the metric increment
-            k = self.code.k
-            n = self.code.n
-            B = self.bias
-
-            if hasattr(self, 'p'):
-                # Binary codewords
-                assert all(z in [0,1] for z in received.flatten())
-                p = self.p
-                d = hamming_distance(received, child.codeword)
-                metric_increment = \
-                        d * np.log2(p) + (n - d) * np.log2(1 - p) \
-                        + (1 - B) * n
-            else:
-                # Real-valued codewords
-                assert all(isinstance(z, float) for z in received.flatten())
-                SNR = self.SNR
-
-                # log2( w(zi|ci) / p(zi) )
-                log_term = lambda z, c: \
-                    1 - SNR / (2 * np.log(2)) * (z - (-1)**c)**2 \
-                    - np.log2(np.exp(-SNR/2 * (z - 1)**2)
-                            + np.exp(-SNR/2 * (z + 1)**2))
-
-                metric_increment = sum(log_term(z, c) - B
-                        for z, c in zip(received, child.codeword))
-
-            child.metric = node.metric + metric_increment
+            child.metric = node.metric + self.compute_metric_increment(
+                    self.bias, received, child.codeword)
 
             self.nodes.put(child)
 
@@ -144,3 +119,31 @@ class StackDecoder:
         """A node with a comparison operator for use in a min-priority queue."""
         def __lt__(self, other):
             return self.metric > other.metric
+
+
+def BSC_metric_increment(n, p):
+    def metric_increment(bias, received, codeword):
+        # Binary codewords
+        assert all(z in [0,1] for z in received.flatten())
+
+        d = hamming_distance(received, codeword)
+        return d * np.log2(p) + (n - d) * np.log2(1 - p) \
+               + (1 - bias) * n
+
+    return metric_increment
+
+def AWGN_2PAM_metric_increment(SNR):
+    def metric_increment(bias, received, codeword):
+        # Real-valued codewords
+        assert all(isinstance(z, float) for z in received.flatten())
+
+        # log2( w(zi|ci) / p(zi) )
+        log_term = lambda z, c: \
+            1 - SNR / (2 * np.log(2)) * (z - (-1)**c)**2 \
+            - np.log2(np.exp(-SNR/2 * (z - 1)**2)
+                    + np.exp(-SNR/2 * (z + 1)**2))
+
+        return sum(log_term(z, c) - bias
+                for z, c in zip(received, codeword))
+
+    return metric_increment
