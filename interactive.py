@@ -128,6 +128,23 @@ def plot_compare():
     plt.text(25, 5, jscc.params.text_description(),
             bbox={'facecolor': 'white', 'edgecolor': 'gray'})
 
+def plot_compare_2():
+    jscc_avg = Measurement.load('data/joint/alpha_1.5_SNR_2_KC_2_256-runs.p')
+    jscc = Measurement.load('data/comparison/alpha_1.5_SNR_2_KC_2--1-joint.p')
+    sep = Measurement.load('data/comparison/alpha_1.5_SNR_2_KC_2--1-separate.p')
+
+    jscc.plot_setup()
+
+    sep.plot_LQG("Tandem (separation-based)")
+    sep.plot_correctly_decoded()
+    jscc.plot_LQG("Spiral JSCC, same noise sequences")
+    jscc_avg.plot_LQG("Spiral JSCC, 256-run average")
+    jscc.plot_bounds(upper_label="Theoretical prediction (spiral JSCC)")
+
+    plt.legend()
+    plt.text(70, 13, jscc.params.text_description(),
+            bbox={'facecolor': 'white', 'edgecolor': 'gray'})
+
 
 def show(delay=0):
     if delay != 0:
