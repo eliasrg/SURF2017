@@ -40,7 +40,7 @@ class Encoder:
         return self.convolutional_code
 
 class Decoder:
-    """Combined source and channel encoder."""
+    """Combined source and channel decoder."""
     def __init__(self, sim, tracker, convolutional_code):
         self.sim = sim
         self.source_decoder = source.Decoder(sim, tracker)
