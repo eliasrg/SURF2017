@@ -69,7 +69,7 @@ class StackDecoder:
 
                 # log2( w(zi|ci) / p(zi) )
                 log_term = lambda z, c: \
-                    1 - SNR/2 * (z - (-1)**c)**2 \
+                    1 - SNR / (2 * np.log(2)) * (z - (-1)**c)**2 \
                     - np.log2(np.exp(-SNR/2 * (z - 1)**2)
                             + np.exp(-SNR/2 * (z + 1)**2))
 
