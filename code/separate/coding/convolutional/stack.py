@@ -47,7 +47,7 @@ class StackDecoder:
         # The first node in each layer
         self.first_nodes = [root]
 
-    def extend(self, node, codeword):
+    def extend(self, node, received):
         for child in node.extend():
             # Calculate the metric increment
             k = self.code.k
@@ -56,15 +56,15 @@ class StackDecoder:
 
             if hasattr(self, 'p'):
                 # Binary codewords
-                assert all(z in [0,1] for z in codeword.flatten())
+                assert all(z in [0,1] for z in received.flatten())
                 p = self.p
-                d = hamming_distance(codeword, child.codeword)
+                d = hamming_distance(received, child.codeword)
                 metric_increment = \
                         d * np.log2(p) + (n - d) * np.log2(1 - p) \
                         + (1 - B) * n
             else:
                 # Real-valued codewords
-                assert all(isinstance(z, float) for z in codeword.flatten())
+                assert all(isinstance(z, float) for z in received.flatten())
                 SNR = self.SNR
 
                 # log2( w(zi|ci) / p(zi) )
@@ -74,7 +74,7 @@ class StackDecoder:
                             + np.exp(-SNR/2 * (z + 1)**2))
 
                 metric_increment = sum(log_term(z, c) - B
-                        for z, c in zip(codeword, child.codeword))
+                        for z, c in zip(received, child.codeword))
 
             child.metric = node.metric + metric_increment
 
