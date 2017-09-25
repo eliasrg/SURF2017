@@ -15,10 +15,7 @@ class Constellation:
         # {-(2^n - 1), -(2^n - 3), ..., 2^n - 3, 2^n - 1} (2^n integers)
         ints = 2 * np.arange(2**n) - (2**n - 1)
 
-        # Normalize
-        points = ints / np.sqrt((ints**2).mean())
-
-        return cls(n, 1, [(p,) for p in points])
+        return cls(n, 1, [(p,) for p in ints])
 
     @classmethod
     def cartesian_product(cls, *constellations, repeat=None):
@@ -65,6 +62,13 @@ class Constellation:
                 - np.log2(sum(np.exp(-SNR/2 * norm_sq(received - point))
                               for point in self.points))
 
+    def normalize(self):
+        """Normalize so that the average power is 1."""
+        power = np.mean([norm_sq(p) for p in self.points])
+        new_points = [tuple(x / np.sqrt(power) for x in p) for p in self.points]
+
+        return self.__class__(self.n, self.K, new_points)
+
 
 def int_to_bits(i, n):
     bits = []
@@ -81,4 +85,4 @@ def bits_to_int(bits):
     return i
 
 def norm_sq(x):
-    return np.sum(x**2)
+    return np.sum(np.array(x)**2)
