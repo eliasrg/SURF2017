@@ -62,10 +62,11 @@ class Constellation:
                 - np.log2(sum(np.exp(-SNR/2 * norm_sq(received - point))
                               for point in self.points))
 
-    def normalize(self):
+    def normalize(self, new_power=1):
         """Normalize so that the average power is 1."""
         power = np.mean([norm_sq(p) for p in self.points])
-        new_points = [tuple(x / np.sqrt(power) for x in p) for p in self.points]
+        factor = np.sqrt(new_power / power)
+        new_points = [tuple(x * factor for x in p) for p in self.points]
 
         return self.__class__(self.n, self.K, new_points)
 
