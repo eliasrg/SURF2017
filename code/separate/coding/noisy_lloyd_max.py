@@ -51,7 +51,8 @@ class Decoder:
         if self.sim.params.analog:
             # AWGN(SNR)
             self.stack_decoder = stack.StackDecoder(
-                    self.convolutional_code, SNR=self.sim.params.SNR)
+                    self.convolutional_code, SNR=self.sim.params.SNR,
+                    PAM=getattr(self.sim.params, 'PAM', None))
         else:
             # BSC(p)
             self.stack_decoder = stack.StackDecoder(
