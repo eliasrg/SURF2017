@@ -34,10 +34,10 @@ class Measurement:
             self.bits = sim.encoder.get_bits_history()
             self.decoded_bits_history.append(list(
                     sim.decoder.stack_decoder.first_nodes[-1].input_history()))
-            # print("Actual:  {}\nDecoded: {}".format(
-            #     actual_bits_history, decoded_bits_history))
             self.correctly_decoded.append(
-                    self.bits == self.decoded_bits_history[-1])
+                    all((word == history_word).all()
+                        for word, history_word in \
+                                zip(self.bits, self.decoded_bits_history[-1])))
             print("Correctly decoded: {}".format(self.correctly_decoded[-1]))
 
     def save(self, filename):
