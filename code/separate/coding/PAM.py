@@ -15,7 +15,7 @@ class Constellation:
         # {-(2^n - 1), -(2^n - 3), ..., 2^n - 3, 2^n - 1} (2^n integers)
         ints = 2 * np.arange(2**n) - (2**n - 1)
 
-        return cls(n, 1, [(p,) for p in ints])
+        return cls(n, 1, [np.array([x]) for x in ints])
 
     @classmethod
     def cartesian_product(cls, *constellations, repeat=None):
@@ -31,21 +31,23 @@ class Constellation:
             init = constellations[:-1]
             inner = cls.cartesian_product(*init)
 
-            for p, q in zip(inner.points, last.points):
-                assert type(p) == type(q) == tuple
-
-            points = [p + q # Concatenation of tuples
+            points = [np.concatenate((p, q))
                     for p in inner.points for q in last.points]
 
             return cls(inner.n + last.n, inner.K + last.K, points)
 
     def __init__(self, n, K, points):
+        for p in points:
+            if type(p) != np.ndarray:
+                raise ValueError(
+                        "Point not of type numpy.ndarray: {}" .format(p))
+
         self.n = n
         self.K = K
         self.points = points
 
     def modulate(self, bits):
-        return self.points[bits_to_int(bits)]
+        return list(self.points[bits_to_int(bits)])
 
     def demodulate(self, point):
         index = min(range(2**self.n),
@@ -66,7 +68,7 @@ class Constellation:
         """Normalize so that the average power is 1."""
         power = np.mean([norm_sq(p) for p in self.points])
         factor = np.sqrt(new_power / power)
-        new_points = [tuple(x * factor for x in p) for p in self.points]
+        new_points = [factor * p for p in self.points]
 
         return self.__class__(self.n, self.K, new_points)
 
@@ -86,4 +88,4 @@ def bits_to_int(bits):
     return i
 
 def norm_sq(x):
-    return np.sum(np.array(x)**2)
+    return np.sum(x**2)
