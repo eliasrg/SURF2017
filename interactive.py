@@ -142,8 +142,8 @@ def plot_compare_2():
     jscc_avg.plot_LQG("Spiral JSCC, 256-run average")
     jscc.plot_bounds(upper_label="Theoretical prediction (spiral JSCC)")
 
-    plt.legend()
-    plt.text(70, 13, jscc.params.text_description(),
+    plt.legend(loc=(.55, .48))
+    plt.text(40, 1.6, jscc.params.text_description(),
             bbox={'facecolor': 'white', 'edgecolor': 'gray'})
 
 
