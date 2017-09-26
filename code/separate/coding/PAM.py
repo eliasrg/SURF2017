@@ -60,8 +60,10 @@ class Constellation:
 
         return (1 - bias) * self.n \
                 - SNR / (2 * np.log(2)) \
-                    * norm_sq(received - self.modulate(codeword)) \
-                - np.log2(sum(np.exp(-SNR/2 * norm_sq(received - point))
+                    * norm_sq(received -
+                            to_column_vector(self.modulate(codeword))) \
+                - np.log2(sum(np.exp(-SNR/2 * norm_sq(
+                                    received - to_column_vector(point)))
                               for point in self.points))
 
     def normalize(self, new_power=1):
