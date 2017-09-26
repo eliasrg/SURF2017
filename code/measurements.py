@@ -29,6 +29,7 @@ class Measurement:
         self.v.append(sim.plant.v)
         self.noise.append(sim.channel.last_noise)
         self.LQG.append(sim.LQG.evaluate(sim.t))
+        self.channel_average_power = sim.channel.average_power()
 
         if hasattr(self, 'bits'):
             self.bits = sim.encoder.get_bits_history()
