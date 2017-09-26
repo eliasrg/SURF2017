@@ -35,7 +35,7 @@ params = Parameters(
         W = 1, V = 0, # Lloyd-Max paper assumes no observation noise
         Q = 1, R = 1, F = 1)
 
-# params.setRates(KC = 1, KS = 1)
+# params.setRates(KC = 2, KS = 1)
 # params.setAnalog(SNR)
 # params.setScheme('joint')
 # print("SDR0 = {}".format(params.SDR0))
