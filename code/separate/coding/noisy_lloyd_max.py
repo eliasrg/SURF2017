@@ -3,7 +3,7 @@
 
 from . import source
 from .convolutional import stack
-from utilities import to_column_vector
+from utilities import to_column_vector, int_to_bits, bits_to_int
 
 import numpy as np
 import warnings
@@ -21,7 +21,7 @@ class Encoder:
 
         # Convert quantization index to bits
         # TODO Worth doing in multiple ways in the digital case?
-        bits = int_to_bits(i)
+        bits = int_to_bits(i, self.convolutional_code.k)
         self.bits_history.append(bits)
 
         # Encode bits with tree code
@@ -117,15 +117,3 @@ class Decoder:
                 "EJ = {:.4f} is less than 2 log2 α = {:.4f}. "
                 + "Expect control to fail."
                 ).format(EJ, 2 * np.log2(alpha)), RuntimeWarning)
-
-
-def int_to_bits(i):
-    assert i in [0,1] # Assume k = 1 in line with 2-PAM
-    return to_column_vector([i])
-
-
-def bits_to_int(bits):
-    assert len(bits) == 1 # Assume k = 1 in line with 2-PAM
-    i = bits.flatten()[0]
-    assert i in [0,1]
-    return i

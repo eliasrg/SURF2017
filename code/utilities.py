@@ -54,3 +54,18 @@ def hamming_distance(a, b):
 def blockify(data, k):
     """Splits a sequence into a list of column vectors of size k."""
     return [to_column_vector(x) for x in np.array(data).reshape([-1, k])]
+
+def int_to_bits(i, n):
+    """Convert and integer into a binary representation of length at least n."""
+    bits = []
+    while i != 0:
+        bits.insert(0, i & 1)
+        i >>= 1
+    return to_column_vector([0] * (n - len(bits)) + bits)
+
+def bits_to_int(bits):
+    """Convert an array of bits into an integer."""
+    i = 0
+    for bit in bits.flatten():
+        i = i << 1 | bit
+    return i

@@ -1,7 +1,7 @@
 # Copyright (c) 2017 Elias Riedel Gårding
 # Licensed under the MIT License
 
-from utilities import to_column_vector
+from utilities import to_column_vector, int_to_bits, bits_to_int
 
 import numpy as np
 
@@ -72,20 +72,6 @@ class Constellation:
 
         return self.__class__(self.n, self.K, new_points)
 
-
-def int_to_bits(i, n):
-    bits = []
-    while i != 0:
-        bits.insert(0, i & 1)
-        i >>= 1
-    return to_column_vector([0] * (n - len(bits)) + bits)
-
-
-def bits_to_int(bits):
-    i = 0
-    for bit in bits.flatten():
-        i = i << 1 | bit
-    return i
 
 def norm_sq(x):
     return np.sum(x**2)
