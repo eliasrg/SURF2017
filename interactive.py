@@ -136,7 +136,7 @@ def plot_compare_2():
 
     jscc.plot_setup()
 
-    sep.plot_LQG("Tandem (separation-based)")
+    sep.plot_LQG("Tandem with (2-PAM)$^2$")
     sep.plot_correctly_decoded()
     jscc.plot_LQG("Spiral JSCC, same noise sequences")
     jscc_avg.plot_LQG("Spiral JSCC, 256-run average")
