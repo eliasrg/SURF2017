@@ -63,6 +63,7 @@ def simulate(params=params, get_noise_record=lambda: None, plots=False):
     for i in range(n_runs):
         sim = Simulation(params, get_noise_record())
         measurement = Measurement(params)
+        measurements.append(measurement)
         if plots:
             tracker = sim.encoder.get_tracker()
             plot_lloyd_max(tracker.distr,
@@ -80,7 +81,6 @@ def simulate(params=params, get_noise_record=lambda: None, plots=False):
                 print("Run {:d}, t = {:d} done".format(i, t))
         except KeyboardInterrupt:
             print("Keyboard interrupt!")
-        measurements.append(measurement)
 
         print("  Average power over channel: {:.4f}".format(
             sim.channel.average_power()))
