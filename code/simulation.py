@@ -88,7 +88,8 @@ class Simulation:
 
             self.encoder = separate.coding.Encoder(
                     self, separate.coding.source.DistributionTracker(
-                        self, 2**params.quantizer_bits), params.convolutional_code)
+                        self, 2**params.quantizer_bits), params.convolutional_code,
+                        getattr(params, 'PAM', None))
             self.decoder = separate.coding.Decoder(
                     self, separate.coding.source.DistributionTracker(
                         self, 2**params.quantizer_bits), params.convolutional_code)
