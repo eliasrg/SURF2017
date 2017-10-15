@@ -52,6 +52,7 @@ params.setRates(KC = 2, KS = 1)
 params.setAnalog(SNR)
 params.quantizer_bits = 1
 params.setBlocklength(2)
+params.set_PAM()
 params.setScheme('separate')
 params.set_random_code()
 

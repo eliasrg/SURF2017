@@ -9,6 +9,7 @@ import joint.coding
 import separate.control.lloyd_max
 import separate.control.noisy_lloyd_max
 import separate.coding
+from separate.coding.PAM import Constellation
 import separate.coding.noisy_lloyd_max
 import separate.coding.source
 import separate.coding.convolutional
@@ -198,6 +199,12 @@ class Parameters:
 
         else:
             raise ValueError("Unrecognized scheme: {}".format(scheme))
+
+    def set_PAM(self):
+        assert self.code_blocklength % self.KC == 0
+        self.PAM = Constellation.cartesian_product(
+                Constellation.uniform(2**(self.code_blocklength // self.KC)),
+                repeat=self.KC).normalize(self.KC)
 
     def set_random_code(self):
         self.convolutional_code = \
