@@ -97,8 +97,8 @@ class DistributionTracker:
 
         # Discretize
         N_SAMPLES = 1000
-        next_lo = -3 * next_std
-        next_hi =  3 * next_std
+        next_lo = -3 * next_std - 2
+        next_hi =  3 * next_std + 2
         x = np.linspace(next_lo, next_hi, num=N_SAMPLES)
         fx = np.where((lo <= (x + L * x_est) / alpha) * ((x + L * x_est) / alpha <= hi),
                 self.distr.pdf((x + L * x_est) / alpha) / (alpha * gamma),
