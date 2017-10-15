@@ -1,7 +1,7 @@
 # Copyright (c) 2017 Elias Riedel Gårding
 # Licensed under the MIT License
 
-from math import atan2, floor, tau
+from math import atan2, floor, pi; tau = 2*pi
 import numpy as np
 from numpy import exp
 from scipy.optimize import newton

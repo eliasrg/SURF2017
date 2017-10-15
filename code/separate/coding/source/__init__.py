@@ -118,7 +118,7 @@ class DistributionTracker:
 
         # Convolve
         fx_with_noise = spacing * convolve(fx, w_fx,
-                mode='same', method='auto')
+                mode='same')
 
         # Normalize to compensate for cut-off
         fx_with_noise /= trapz(fx_with_noise, x)
