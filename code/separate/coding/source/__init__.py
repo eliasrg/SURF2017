@@ -1,17 +1,12 @@
 # Copyright (c) 2017 Elias Riedel Gårding
 # Licensed under the MIT License
 
-from distributions import gaussian, Custom
-from . import lloyd_max
-
 import numpy as np
-from scipy.integrate import quad, trapz
+from scipy.interpolate import interp1d
 from scipy.signal import convolve
-import scipy.stats as stats
+import matplotlib.pyplot as plt
 
-# Integral subdivision limit
-LIMIT = 10
-
+from . import lloyd_max
 
 class Encoder:
     def __init__(self, sim, tracker):
@@ -50,6 +45,75 @@ class Decoder:
         return (x_est,)
 
 
+# Hikmet's code
+
+# Constants
+RESOLUTION=1<<7
+
+class Distribution:
+    def __init__(self, interval, pdf):
+        self.interval=interval
+        self.pdf=pdf
+        self.is_hikmet = True
+    @classmethod
+    def bySamples(cls, x, fx): # Interpolate to get the pdf
+        # Use logarithmic interpolation to preserve log-concavity
+        dx=x[1]-x[0]
+        fx=np.array(fx, dtype = float) / sum(fx) / dx
+        Fx=np.cumsum(fx)*dx
+        v1 = sum(1 for i in Fx if i < 1e-5)
+        v2 = sum(1 for i in Fx if i < 1-1e-5)
+        x=x[v1:v2]
+        fx=fx[v1:v2]
+        fx=np.array(fx, dtype = float) / sum(fx) / dx
+        logfx=np.log(fx)
+        logpdf=interp1d(x, logfx, kind='linear',
+                        bounds_error=False, fill_value=float('-inf'))
+        pdf = lambda t : np.exp(logpdf(t))
+        return cls((x[0],x[-1]), pdf)
+    def convolution(d1, d2):
+        a1,b1 = d1.interval
+        a2,b2 = d2.interval
+        delta = max(b1-a1,b2-a2) / float(RESOLUTION)
+        f1=[d1.pdf(i) for i in np.arange(a1,b1,delta)]
+        f2=[d2.pdf(i) for i in np.arange(a2,b2,delta)]
+        fx=convolve(f1, f2)
+        x=[a1+a2+delta*i for i in range(len(fx))]
+        return Distribution.bySamples(x, fx)
+
+def LM(distribution, n):
+    # Some definitions
+    maxiter=1<<10
+    N=RESOLUTION
+    a,b = distribution.interval
+    x=np.linspace(a,b,N)
+    fx=np.array([distribution.pdf(i) for i in x])
+    fx[np.isnan(fx)]=0
+    dx=(b-a) / (N-1.)
+    Fx=np.cumsum(fx)*dx
+    index=lambda y: int(min(N-1, max(0, np.round((y-a) / float(dx)))))
+
+    # Initialization
+    c=np.zeros(n)
+    p=np.array([x[i] for i in sorted(np.random.randint(0, N, n-1))])
+    # Loop
+    error=1
+    iteration=0
+    while error > 0 and iteration<maxiter:
+        iteration +=1
+        # centers from boundaries
+        pin=[0]+[index(i) for i in p]+[N-1]
+        for i in range(n):
+            c[i]=sum(x[j]*fx[j] for j in range(pin[i],pin[i+1]+1))\
+                /sum(     fx[j] for j in range(pin[i],pin[i+1]+1))
+        pin_temp=pin
+        # boundaries from centers
+        p=(c[:-1]+c[1:]) / 2.
+        pin=[0]+[index(i) for i in p] + [N-1]
+        error=sum(abs(pin_temp[i]-pin[i]) for i in range(n+1))
+    return ([a]+list(p)+[b],c)
+
+
 class DistributionTracker:
     """Keeps track of the distribution of the plant's state."""
     def __init__(self, sim, n_levels, distr=None,
@@ -59,9 +123,15 @@ class DistributionTracker:
 
         if distr is None:
             assert lm_encoder is None and lm_decoder is None
-            self.distr = sim.plant.x1_distr
-            self.lm_encoder, self.lm_decoder = \
-                lloyd_max.generate(n_levels, self.distr)
+            W = self.sim.params.W
+            self.fw = Distribution((-10,10),
+                    lambda x : W * np.exp(-x**2 / 2.) / np.sqrt(2.0 * np.pi)
+                    )# pdf of w_t: N(0,W) with support (-10,10)
+            self.distr = self.fw
+            boundaries, levels = LM(self.distr,
+                    2**self.sim.params.quantizer_bits)
+            self.lm_encoder = lloyd_max.Encoder(boundaries)
+            self.lm_decoder = lloyd_max.Decoder(levels, boundaries)
         else:
             assert lm_encoder is not None and lm_decoder is not None
             self.distr = distr
@@ -81,19 +151,13 @@ class DistributionTracker:
         if hasattr(self, 'fx'): new.fx = self.fx
         if hasattr(self, 'w_x'): new.w_x = self.w_x
         if hasattr(self, 'w_fx'): new.w_fx = self.w_fx
+        if hasattr(self, 'd1'): new.d1 = self.d1
+        if hasattr(self, 'fw'): new.fw = self.fw
 
         return new
 
     def update(self, i, debug_globals=dict()):
-        # Retrieve the interval and reproduction value
-        lo, hi = self.lm_decoder.get_interval(i)
-        x_est = self.lm_decoder.decode(i)
-        # (avoid infinite intervals)
-        if i == 0: lo = hi - 3 * self.distr.std()
-        if i == self.n_levels - 1: hi = lo + 3 * self.distr.std()
-
-        # Compute parameters
-        alpha = self.sim.params.alpha
+        A = self.sim.params.alpha
         L = self.sim.params.L(self.sim.t)
         gamma, _ = quad(self.distr.pdf, lo, hi)
         mean, _ = quad(lambda x: x * self.distr.pdf(x) / gamma, lo, hi)
@@ -117,27 +181,21 @@ class DistributionTracker:
         w_x = np.arange(-2 * w_distr.std(), 2 * w_distr.std(), spacing)
         w_fx = w_distr.pdf(w_x)
 
-        # DEBUG
-        self.x = x
-        self.fx = fx
-        self.w_x = w_x
-        self.w_fx = w_fx
+        x_hat = self.lm_decoder.decode(i)
+        u = -L * x_hat
 
-        # Convolve
-        fx_with_noise = spacing * convolve(fx, w_fx,
-                mode='same')
+        lo, hi = self.lm_decoder.get_interval(i)
+        lo = max(lo, self.distr.interval[0])
+        hi = min(hi, self.distr.interval[1])
 
-        # Normalize to compensate for cut-off
-        fx_with_noise /= trapz(fx_with_noise, x)
+        self.d1 = Distribution((A*lo+u,A*hi+u), lambda x: self.distr.pdf((x-u) / float(A)))
+        self.distr = Distribution.convolution(self.d1, self.fw)
 
-
-        # Interpolate the new PDF and construct the new distribution
-        self.distr = Custom(x, fx_with_noise)
         self.distrs.append(self.distr) # DEBUG
 
         # DEBUG: For inspecting the local variables interactively
         debug_globals.update(locals())
 
-        # Generate the next Lloyd-Max quantizer
-        self.lm_encoder, self.lm_decoder = lloyd_max.generate(
-                self.n_levels, self.distr)
+        boundaries, levels = LM(self.distr, 2**self.sim.params.quantizer_bits)
+        self.lm_encoder = lloyd_max.Encoder(boundaries)
+        self.lm_decoder = lloyd_max.Decoder(levels, boundaries)

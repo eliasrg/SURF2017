@@ -41,6 +41,42 @@ def plot_lloyd_max_tracker(distr, enc, dec, tracker, x_hit=None):
     # plt.ylim(-0.05, 0.4)
     plt.axis('tight')
 
+def plot_lloyd_max_hikmet(distr, boundaries, levels, x_hit=None):
+    plt.figure()
+    plt.scatter(levels, np.zeros(len(levels)), color='red')
+    # plt.scatter(boundaries, np.zeros(len(boundaries)),
+    #         color='purple', s=3)
+    for boundary in boundaries:
+        plt.plot([boundary, boundary], [-0.01, distr.pdf(boundary)], color='gray')
+    # plt.scatter([distr.mean()], [distr.pdf(distr.mean())], color='green')
+    if x_hit is not None: plt.scatter([x_hit], [0], marker='x')
+    a = max(distr.interval[0], -20)
+    b = min(distr.interval[1], 20)
+    x = np.linspace(a, b, num=10000)
+    plt.plot(x, distr.pdf(x))
+    # plt.xlim(-20, 20)
+    # plt.ylim(-0.05, 0.4)
+    plt.axis('tight')
+
+def plot_lloyd_max_tracker_hikmet(distr, boundaries, levels, d1, fw, x_hit=None):
+    plt.figure()
+    plt.scatter(levels, np.zeros(len(levels)), color='red')
+    # plt.scatter(boundaries, np.zeros(len(boundaries)),
+    #         color='purple', s=3)
+    for boundary in boundaries:
+        plt.plot([boundary, boundary], [-0.01, distr.pdf(boundary)], color='gray')
+    # plt.scatter([distr.mean()], [distr.pdf(distr.mean())], color='green')
+    if x_hit is not None: plt.scatter([x_hit], [0], marker='x')
+    a = max(distr.interval[0], -20)
+    b = min(distr.interval[1], 20)
+    x = np.linspace(a, b, num=10000)
+    plt.plot(x, distr.pdf(x))
+    plt.plot(x, (d1.interval[0] <= x) * (x <= d1.interval[1]) * d1.pdf(x), color='orange')
+    plt.plot(x, fw.pdf(x), color='purple')
+    # plt.xlim(-20, 20)
+    # plt.ylim(-0.05, 0.4)
+    plt.axis('tight')
+
 
 def plot_spiral(spiral_map):
     s = np.linspace(0, 7, num=1000)

@@ -14,6 +14,7 @@ from scipy.integrate import quad
 from simulation import Simulation, Parameters
 from measurements import Measurement
 from plotting import plot_lloyd_max, plot_lloyd_max_tracker, \
+        plot_lloyd_max_hikmet, plot_lloyd_max_tracker_hikmet, \
         plot_spiral, plot_spiral_decode
 
 import separate.coding.source.lloyd_max as lm
@@ -75,15 +76,27 @@ def simulate(params=params, get_noise_record=lambda: None, plots=False):
                 measurement.record(sim)
                 if plots:
                     if t == 1:
-                        plot_lloyd_max(prev_distr,
-                                prev_lm_encoder,
-                                prev_lm_decoder,
-                                x_hit=sim.plant.x)
+                        if hasattr(prev_distr, 'is_hikmet'):
+                            plot_lloyd_max_hikmet(prev_distr,
+                                    prev_lm_encoder.boundaries,
+                                    prev_lm_decoder.levels,
+                                    x_hit=sim.plant.x)
+                        else:
+                            plot_lloyd_max(prev_distr,
+                                    prev_lm_encoder,
+                                    prev_lm_decoder,
+                                    x_hit=sim.plant.x)
                     else:
-                        plot_lloyd_max_tracker(prev_distr,
-                                prev_lm_encoder,
-                                prev_lm_decoder,
-                                tracker, x_hit=sim.plant.x)
+                        if hasattr(prev_distr, 'is_hikmet'):
+                            plot_lloyd_max_tracker_hikmet(prev_distr,
+                                    prev_lm_encoder.boundaries,
+                                    prev_lm_decoder.levels,
+                                    tracker.d1, tracker.fw, x_hit=sim.plant.x)
+                        else:
+                            plot_lloyd_max_tracker(prev_distr,
+                                    prev_lm_encoder,
+                                    prev_lm_decoder,
+                                    tracker, x_hit=sim.plant.x)
                     tracker = sim.encoder.get_tracker().clone()
                     prev_distr = tracker.distr
                     prev_lm_encoder = tracker.lm_encoder
