@@ -66,19 +66,28 @@ def simulate(params=params, get_noise_record=lambda: None, plots=False):
         measurement = Measurement(params)
         measurements.append(measurement)
         if plots:
-            tracker = sim.encoder.get_tracker()
-            plot_lloyd_max(tracker.distr,
-                    tracker.lm_encoder,
-                    tracker.lm_decoder, x_hit=sim.plant.x)
+            tracker = sim.encoder.get_tracker().clone()
+            prev_distr = tracker.distr
+            prev_lm_encoder = tracker.lm_encoder
+            prev_lm_decoder = tracker.lm_decoder
         try:
             for t in sim.simulate(T):
                 measurement.record(sim)
                 if plots:
-                    tracker = sim.encoder.get_tracker()
-                    plot_lloyd_max_tracker(tracker.distr,
-                            tracker.lm_encoder,
-                            tracker.lm_decoder,
-                            tracker, x_hit=sim.plant.x)
+                    if t == 1:
+                        plot_lloyd_max(prev_distr,
+                                prev_lm_encoder,
+                                prev_lm_decoder,
+                                x_hit=sim.plant.x)
+                    else:
+                        plot_lloyd_max_tracker(prev_distr,
+                                prev_lm_encoder,
+                                prev_lm_decoder,
+                                tracker, x_hit=sim.plant.x)
+                    tracker = sim.encoder.get_tracker().clone()
+                    prev_distr = tracker.distr
+                    prev_lm_encoder = tracker.lm_encoder
+                    prev_lm_decoder = tracker.lm_decoder
                 print("Run {:d}, t = {:d} done".format(i, t))
         except KeyboardInterrupt:
             print("Keyboard interrupt!")

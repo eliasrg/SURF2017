@@ -74,7 +74,14 @@ class DistributionTracker:
     def clone(self):
         new = self.__class__(self.sim, self.n_levels, self.distr,
                 self.lm_encoder, self.lm_decoder)
+
+        # DEBUG
         new.distrs = self.distrs[:]
+        if hasattr(self, 'x'): new.x = self.x
+        if hasattr(self, 'fx'): new.fx = self.fx
+        if hasattr(self, 'w_x'): new.w_x = self.w_x
+        if hasattr(self, 'w_fx'): new.w_fx = self.w_fx
+
         return new
 
     def update(self, i, debug_globals=dict()):
