@@ -29,7 +29,7 @@ n_runs = 1 << 0
 T = 1 << 7
 
 
-SNR = 2
+SNR = 10**(20 / 10)
 params = Parameters(
         T = T,
         alpha = 1.5,
@@ -44,10 +44,10 @@ params = Parameters(
 # params.setDigital(quantizer_bits = 1)
 # params.setScheme('lloyd-max')
 
-# params.setDigital(quantizer_bits = 1, p = 0.1)
-# params.setBlocklength(3)
-# params.setScheme('noisy-lloyd-max')
-# params.set_random_code()
+params.setDigital(quantizer_bits = 1, p = 0.001)
+params.setBlocklength(2)
+params.setScheme('noisy-lloyd-max')
+params.set_random_code()
 
 params.setRates(KC = 2, KS = 1)
 params.setAnalog(SNR)

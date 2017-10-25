@@ -21,6 +21,7 @@ class StackDecoder:
         """If p is given, assumes BSC(p). If SNR is given, assumes AWGN(SNR)."""
         self.code = code
         if p is not None:
+            self.p = p
             self.compute_metric_increment = BSC_metric_increment(code.n, p)
         elif SNR is not None:
             self.SNR = SNR

@@ -159,27 +159,6 @@ class DistributionTracker:
     def update(self, i, debug_globals=dict()):
         A = self.sim.params.alpha
         L = self.sim.params.L(self.sim.t)
-        gamma, _ = quad(self.distr.pdf, lo, hi)
-        mean, _ = quad(lambda x: x * self.distr.pdf(x) / gamma, lo, hi)
-        variance, _ = quad(lambda x: (x - x_est)**2 * self.distr.pdf(x) / gamma,
-                lo, hi)
-        std = np.sqrt(variance)
-        next_std = alpha * std
-
-        # Discretize
-        N_SAMPLES = 1000
-        next_lo = -3 * next_std - 2
-        next_hi =  3 * next_std + 2
-        x = np.linspace(next_lo, next_hi, num=N_SAMPLES)
-        fx = np.where((lo <= (x + L * x_est) / alpha) * ((x + L * x_est) / alpha <= hi),
-                self.distr.pdf((x + L * x_est) / alpha) / (alpha * gamma),
-                0)
-        spacing = x[1] - x[0]
-
-        # Noise
-        w_distr = self.sim.plant.w_distr
-        w_x = np.arange(-2 * w_distr.std(), 2 * w_distr.std(), spacing)
-        w_fx = w_distr.pdf(w_x)
 
         x_hat = self.lm_decoder.decode(i)
         u = -L * x_hat
