@@ -95,7 +95,7 @@ def LM(distribution, n):
 
     # Initialization
     c=np.zeros(n)
-    p=np.array([x[i] for i in sorted(np.random.randint(0, N, n-1))])
+    p=np.array([x[int(i)] for i in np.round(np.linspace(0, N, num=n+1)[1:-1])])
     # Loop
     error=1
     iteration=0
