@@ -15,6 +15,9 @@ class Observer:
         self.x_u_ideal_minus_actual.step(
                 self.u_ideal_previous - u_actual_previous)
 
+        if abs(self.x_u_ideal_minus_actual.value) < 1e-3:
+            self.x_u_ideal_minus_actual.value = 0
+
         # Calculate the ideal (noiseless) estimate
         x_est = y # TODO take observation noise into account
         x_est_ideal = x_est + self.x_u_ideal_minus_actual.value
