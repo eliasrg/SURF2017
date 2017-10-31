@@ -89,34 +89,36 @@ class Measurement:
             self.plot_correctly_decoded()
         plt.legend()
 
-    def plot_setup(self):
-        plt.xlabel("Time [steps]")
+    def plot_setup(self, label="Time [steps]"):
+        plt.xlabel(label)
         plt.grid()
 
     def plot_x(self):
         plt.plot(list(range(len(self.x))), self.x)
         plt.ylabel("Plant state")
 
-    def plot_LQG(self, label=None):
+    def plot_LQG(self, label=None, *args, **kwargs):
         plt.plot(list(range(len(self.LQG))), 10 * np.log10(self.LQG),
-                label=label)
-        plt.ylabel("Control cost [dB]")
+                label=label, *args, **kwargs)
+        plt.ylabel(r"$\bar{J}_t$ [dB]")
 
     def plot_bounds(self, lower_label="Theoretical average lower bound",
-            upper_label="Theoretical prediction"):
+            upper_label="Theoretical prediction",
+            lower_args=['--'], lower_kwargs={},
+            upper_args=['--'], upper_kwargs={}):
         params = self.params
 
         # Upper bound
         if params.analog and hasattr(params, 'SDR0'):
             plt.plot((1, len(self.LQG)),
                     10 * np.log10(params.LQR_inf_upper_bound()) * np.ones(2),
-                    '--', label=upper_label)
+                    *upper_args, label=upper_label, **upper_kwargs)
 
         # Lower bound
         if params.analog:
             plt.plot((1, len(self.LQG)),
                     10 * np.log10(params.LQR_inf_lower_bound()) * np.ones(2),
-                    '--', label=lower_label)
+                    *lower_args, label=lower_label, **lower_kwargs)
 
     def plot_correctly_decoded(self, y=0):
         RECTANGLE_HEIGHT = 0.8
