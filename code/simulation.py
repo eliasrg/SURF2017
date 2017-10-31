@@ -203,7 +203,7 @@ class Parameters:
     def set_PAM(self):
         assert self.code_blocklength % self.KC == 0
         self.PAM = Constellation.cartesian_product(
-                Constellation.uniform(2**(self.code_blocklength // self.KC)),
+                Constellation.uniform(self.code_blocklength // self.KC),
                 repeat=self.KC).normalize(self.KC)
 
     def set_random_code(self):
