@@ -5,11 +5,12 @@ import sys, os
 sys.path.insert(0,
         os.path.abspath(os.path.join(os.path.dirname(__file__), 'code')))
 
-from itertools import islice
+from itertools import islice, count
 import numpy as np
 import scipy.stats as st
 import matplotlib.pyplot as plt
 from scipy.integrate import quad
+from collections import defaultdict
 
 from simulation import Simulation, Parameters
 from measurements import Measurement
@@ -56,6 +57,54 @@ params.setBlocklength(2)
 params.set_PAM()
 params.setScheme('separate')
 params.set_random_code()
+
+
+def generate_filename(SNR_dB, alpha, i, quantizer_bits=1, code_blocklength=1):
+    if SNR_dB == 'noiseless':
+        filename_pattern = \
+            'data/separate/varying-SNR/alpha{}/noiseless/noiseless--{{}}.p' \
+            .format(alpha)
+    else:
+        filename_pattern = 'data/separate/varying-SNR/alpha{}/{}:{}/{}dB--{{}}.p' \
+                .format(alpha, quantizer_bits, code_blocklength, SNR_dB)
+
+    return filename_pattern.format(i)
+
+def load_measurements(SNR_dB, alpha=1.2, quantizer_bits=1, code_blocklength=2):
+    results = []
+    for i in count(1):
+        filename = generate_filename(SNR_dB, alpha, i, quantizer_bits,
+                code_blocklength)
+        if os.path.isfile(filename):
+            results.append(Measurement.load(filename))
+        else:
+            break
+
+    return results
+
+def simulate_and_record(params):
+    # Take measurement
+    bad = False
+    if SNR_dB != 'noiseless':
+        params.set_random_code() # Use different codes each time
+    try:
+        simulate(params)
+    except (ValueError, TypeError):
+        input("Bad! :( ")
+        bad = True
+
+    # Generate filename
+    for i in count(1):
+        filename = 'bad-' if bad else ''
+        filename += generate_filename(SNR_dB, params.alpha, i,
+                params.quantizer_bits,
+                params.code_blocklength)
+        if not os.path.isfile(filename):
+            break
+
+    print("Saving to {}".format(filename))
+    measurements[-1].save(filename)
+
 
 
 measurements = []
@@ -169,52 +218,54 @@ def plot_compare_2():
     plt.text(40, 1.6, jscc.params.text_description(),
             bbox={'facecolor': 'white', 'edgecolor': 'gray'})
 
-def load_varying_SNR():
-    files = {'noiseless': [1,2,3,4],
-             5:  [1,2,3,4,5,6],
-             7:  [1,2,3,4,5,6],
-             8:  [1,2,3,4,5,6],
-             10: [1,2,3,4,5,6],
-             15: [1,2,3,4,5,6],
-             20: [1,2,3,4],
-             25: [1,2,3,4,5,6]}
-    return {SNRdB: [Measurement.load(
-            'data/separate/varying-SNR/{}--{}.p'.format(
-                str(SNRdB) + ('dB' if SNRdB != 'noiseless' else ''), run))
-            for run in runs]
-        for SNRdB, runs in files.items()}
+def plot_varying_SNR(alpha, multi=False, log_outside=True):
+    plt.figure()
 
-def load_convergent_varying_SNR(data=None):
-    good = {'noiseless': [1,2,3],
-            5:  [1,5],
-            7:  [],
-            8:  [1,5,6],
-            10: [1,2,3,6],
-            15: [2,3,5,6],
-            20: [1,2,3],
-            25: [3,4,5]}
+    def closest(n):
+        return min(256, 512, 1024, 1536, 2048, key=lambda x: abs(x - n))
 
-    if data is None:
-        data = load_varying_SNR()
-    return {SNRdB: [runs[i - 1] for i in good[SNRdB]]
-            for SNRdB, runs in data.items()}
+    # SNR_dBs = [9, 10, 10.5, 11, 11.5, 12, 13, 13.5, 14, 15, 17, 20, 23, 25]
+    # SNR_dBs = [7.5, 8, 8.5, 9, 10, 10.25, 10.5, 10.75, 11, 11.25, 11.5, 11.75, 12, 13,
+    #         14, 15, 16, 'noiseless']
+    if not multi:
+        # SNR_dBs = sorted([
+        #             # 10, 10.25, 10.5, 10.75,
+        #             11, 11.25, 11.5, 11.75,
+        #             12, 12.25, 12.5, 12.75,
+        #             13,        13.5, 13.75,
+        #             14, 15, 16
+        #             ])
+        SNR_dBs = sorted(
+                # [1, 1.5, 2, 2.5, 3, 3.5] +
+                [4, 4.25, 4.5, 5, 5.5, 6, 6.5, 7, 15, 25])
+        ms = {SNR_dB: load_measurements(SNR_dB, alpha) for SNR_dB in SNR_dBs}
+    else:
+        # SNR_dBs = sorted([30, 25, 24.5, 24, 23.5, 23, 22.5, 22, 20, 17.5, 15, 12.5, 10])
+        # SNR_dBs = sorted([8, 25, 24.5, 24, 23.5, 23, 22.75, 22.5, 22])
+        SNR_dBs = sorted([7, 8, 8.5, 9, 9.5, 10, 11, 12, 15, 25])
+        ms = {SNR_dB: load_measurements(SNR_dB, alpha, 2, 4)
+                for SNR_dB in SNR_dBs}
 
-def average_convergent_varying_SNR(data=None):
-    if data is None:
-        data = load_convergent_varying_SNR()
-    return {SNRdB: np.mean([10 * np.log10(m.LQG[-1]) for m in runs])
-            for SNRdB, runs in data.items()}
+    if log_outside:
+        LQGlog10s = [10 * np.log10(np.mean([m.LQG[-1] for m in ms[SNR_dB]]))
+                for SNR_dB in SNR_dBs]
+    else:
+        LQGlog10s = [np.mean([10 * np.log10(m.LQG[-1]) for m in ms[SNR_dB]])
+                for SNR_dB in SNR_dBs]
 
-def print_average_convergent_varying_SNR():
-    data = load_varying_SNR()
-    convergent_data = load_convergent_varying_SNR(data)
-    average_data = average_convergent_varying_SNR(convergent_data)
+    plt.grid()
+    SNR_dBs += [None]
+    LQGlog10s += [None]
+    plt.scatter(SNR_dBs[:-1], LQGlog10s[:-1]) # (without noiseless)
+    plt.xlabel("SNR [dB]")
+    plt.ylabel("Average final average cost [dB]")
 
-    for SNRdB, average in average_data.items():
-        print("{}: {:6g} ({}/{} runs)".format(
-            str(SNRdB) + (" dB" if SNRdB != 'noiseless' else ""),
-            average,
-            len(convergent_data[SNRdB]), len(data[SNRdB])))
+    del SNR_dBs[-1], LQGlog10s[-1]
+
+    for SNR_dB, LQGlog10 in zip(SNR_dBs, LQGlog10s):
+        print("{:5}dB: {} ({} runs)".format(SNR_dB, LQGlog10,
+            len(ms[SNR_dB]) ))#,
+            # closest(len(ms[SNR_dB]))))
 
 
 def show(delay=0):
@@ -222,3 +273,42 @@ def show(delay=0):
         from time import sleep
         sleep(delay)
     plt.show(block=False)
+
+
+
+def take_data():
+    global SNR_dB
+    for alpha in [1.2]: #, 1.2]:
+        for SNR_dB in [
+                # 11, 12
+                # 8.5, 9.5
+                15, 25
+                ]:
+            SNR = 10**(SNR_dB / 10)
+            params = Parameters(
+                    T = T,
+                    alpha = alpha,
+                    W = 1, V = 0, # Lloyd-Max paper assumes no observation noise
+                    Q = 1, R = 0, F = 1)
+
+            params.setRates(KC = 2, KS = 1)
+            params.setAnalog(SNR)
+            params.quantizer_bits = 1
+            params.setBlocklength(2)
+            params.set_PAM()
+            params.setScheme('separate')
+            params.set_random_code()
+
+            N = 256
+            n = defaultdict(lambda: N, {3: 2 * 256 - 280})
+
+            for _ in range(n[SNR_dB]):
+                try:
+                    simulate_and_record(params)
+                except KeyboardInterrupt:
+                    break
+                except (ValueError, TypeError):
+                    pass
+
+
+            del measurements[:]
