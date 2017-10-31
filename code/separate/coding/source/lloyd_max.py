@@ -18,10 +18,8 @@ class Encoder:
         self.boundaries = boundaries
 
     def encode(self, *msg):
-        assert len(msg) == 1 # One real number
-        x = msg[0]
-        return int_binsearch(lambda i: self.boundaries[i] >= x,
-                0, len(self.boundaries)) - 1
+        (x,) = msg
+        return sum(1 for i in self.boundaries[1:-1] if i <= x)
 
 
 class Decoder:
