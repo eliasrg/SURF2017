@@ -4,6 +4,7 @@
 from itertools import islice
 from types import SimpleNamespace
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 import numpy as np
 import pickle
 
@@ -117,7 +118,9 @@ class Measurement:
                     10 * np.log10(params.LQR_inf_lower_bound()) * np.ones(2),
                     '--', label=lower_label)
 
-    def plot_correctly_decoded(self):
+    def plot_correctly_decoded(self, y=0):
+        RECTANGLE_HEIGHT = 0.8
+
         # Find intervals of consecutive Trues
         intervals = []
         start = None
@@ -130,5 +133,12 @@ class Measurement:
 
         for i, (start, stop) in enumerate(intervals):
             print("({}, {})".format(start, stop))
-            plt.plot([start, stop], [0, 0], color='purple', linewidth=5,
-                    label="Decoding errors" if i == 0 else None)
+            plt.gca().add_patch(
+                patches.Rectangle(
+                    (start, y - RECTANGLE_HEIGHT/2),
+                    stop - start,
+                    RECTANGLE_HEIGHT,
+                    label="Decoding errors" if i == 0 else None,
+                    color='purple'
+                )
+            )
