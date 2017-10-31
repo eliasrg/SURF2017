@@ -218,6 +218,27 @@ def plot_compare_2():
     plt.text(40, 1.6, jscc.params.text_description(),
             bbox={'facecolor': 'white', 'edgecolor': 'gray'})
 
+def plot_compare_3():
+    import matplotlib
+    matplotlib.rcParams.update({'font.size': 15})
+
+    jscc_avg = Measurement.load('data/joint/alpha_1.2_SNR_4.5dB_KC_2_256-runs.p')
+    jscc = Measurement.load('data/comparison/alpha_1.2_SNR_4.5dB_KC_2--1-joint.p')
+    sep = Measurement.load('data/comparison/alpha_1.2_SNR_4.5dB_KC_2--1-separate.p')
+
+    jscc.plot_setup()
+
+    sep.plot_LQG("Tandem with (2-PAM)$^2$")
+    sep.plot_correctly_decoded()
+    jscc.plot_LQG("Spiral JSCC, same noise sequences")
+    jscc_avg.plot_LQG("Spiral JSCC, 256-run average")
+    jscc.plot_bounds(upper_label="Theoretical prediction (spiral JSCC)")
+
+    plt.legend(loc=(.4, .05))
+    plt.text(60, 4, jscc.params.text_description(dB=True),
+            bbox={'facecolor': 'white', 'edgecolor': 'gray'})
+
+
 def plot_varying_SNR(alpha, multi=False, log_outside=True):
     plt.figure()
 
