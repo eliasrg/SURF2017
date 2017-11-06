@@ -93,7 +93,7 @@ class DistributionTracker:
         variance, _ = quad(lambda x: (x - x_est)**2 * self.distr.pdf(x) / gamma,
                 lo, hi)
         std = np.sqrt(variance)
-        next_std = alpha**2 * std
+        next_std = alpha * std
 
         # Discretize
         N_SAMPLES = 1000
