@@ -147,6 +147,53 @@ def plot_compare_2():
     plt.text(40, 1.6, jscc.params.text_description(),
             bbox={'facecolor': 'white', 'edgecolor': 'gray'})
 
+def load_varying_SNR():
+    files = {'noiseless': [1,2,3,4],
+             5:  [1,2,3,4,5,6],
+             7:  [1,2,3,4,5,6],
+             8:  [1,2,3,4,5,6],
+             10: [1,2,3,4,5,6],
+             15: [1,2,3,4,5,6],
+             20: [1,2,3,4],
+             25: [1,2,3,4,5,6]}
+    return {SNRdB: [Measurement.load(
+            'data/separate/varying-SNR/{}--{}.p'.format(
+                str(SNRdB) + ('dB' if SNRdB != 'noiseless' else ''), run))
+            for run in runs]
+        for SNRdB, runs in files.items()}
+
+def load_convergent_varying_SNR(data=None):
+    good = {'noiseless': [1,2,3],
+            5:  [1,5],
+            7:  [],
+            8:  [1,5,6],
+            10: [1,2,3,6],
+            15: [2,3,5,6],
+            20: [1,2,3],
+            25: [3,4,5]}
+
+    if data is None:
+        data = load_varying_SNR()
+    return {SNRdB: [runs[i - 1] for i in good[SNRdB]]
+            for SNRdB, runs in data.items()}
+
+def average_convergent_varying_SNR(data=None):
+    if data is None:
+        data = load_convergent_varying_SNR()
+    return {SNRdB: np.mean([10 * np.log10(m.LQG[-1]) for m in runs])
+            for SNRdB, runs in data.items()}
+
+def print_average_convergent_varying_SNR():
+    data = load_varying_SNR()
+    convergent_data = load_convergent_varying_SNR(data)
+    average_data = average_convergent_varying_SNR(convergent_data)
+
+    for SNRdB, average in average_data.items():
+        print("{}: {:6g} ({}/{} runs)".format(
+            str(SNRdB) + (" dB" if SNRdB != 'noiseless' else ""),
+            average,
+            len(convergent_data[SNRdB]), len(data[SNRdB])))
+
 
 def show(delay=0):
     if delay != 0:
