@@ -11,7 +11,7 @@ from numpy import linalg as LA
 LIMIT = 10
 
 # Maximum number of iterations for the Lloyd-Max algorithm
-MAX_ITERATIONS = 200
+MAX_ITERATIONS = 20
 
 class Encoder:
     def __init__(self, boundaries):
@@ -66,7 +66,6 @@ def generate(n_levels, distr):
         if dist < 0.001:
             break
     else:
-        raise RuntimeError("Lloyd-Max failed to converge after {} iterations."
-                .format(MAX_ITERATIONS))
+        pass
 
     return Encoder(boundaries), Decoder(levels, boundaries)
