@@ -33,7 +33,7 @@ params = Parameters(
         T = T,
         alpha = 1.5,
         W = 1, V = 0, # Lloyd-Max paper assumes no observation noise
-        Q = 1, R = 1, F = 1)
+        Q = 1, R = 0, F = 1)
 
 # params.setRates(KC = 2, KS = 1)
 # params.setAnalog(SNR)
