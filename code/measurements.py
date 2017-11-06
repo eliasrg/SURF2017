@@ -54,7 +54,6 @@ class Measurement:
 
     @staticmethod
     def average(measurements):
-        assert all(m.params == measurements[0].params for m in measurements)
         new = Measurement(measurements[0].params)
 
         def average_sequence(sequences):
