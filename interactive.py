@@ -30,12 +30,14 @@ n_runs = 1 << 0
 T = 1 << 7
 
 
-SNR = 10**(20 / 10)
-params = Parameters(
-        T = T,
-        alpha = 1.5,
-        W = 1, V = 0, # Lloyd-Max paper assumes no observation noise
-        Q = 1, R = 0, F = 1)
+params = None
+# SNR_dB = 4.5
+# SNR = 10**(SNR_dB / 10)
+# params = Parameters(
+#         T = T,
+#         alpha = 1.2,
+#         W = 1, V = 0, # Lloyd-Max paper assumes no observation noise
+#         Q = 1, R = 0, F = 1)
 
 # params.setRates(KC = 2, KS = 1)
 # params.setAnalog(SNR)
@@ -45,18 +47,20 @@ params = Parameters(
 # params.setDigital(quantizer_bits = 1)
 # params.setScheme('lloyd-max')
 
-params.setDigital(quantizer_bits = 1, p = 0.001)
-params.setBlocklength(2)
-params.setScheme('noisy-lloyd-max')
-params.set_random_code()
+# code_blocklength = None
 
-params.setRates(KC = 2, KS = 1)
-params.setAnalog(SNR)
-params.quantizer_bits = 1
-params.setBlocklength(2)
-params.set_PAM()
-params.setScheme('separate')
-params.set_random_code()
+# params.setDigital(quantizer_bits = 1, p = 0.001)
+# params.setBlocklength(2)
+# params.setScheme('noisy-lloyd-max')
+# params.set_random_code()
+
+# params.setRates(KC = 2, KS = 1)
+# params.setAnalog(SNR)
+# params.quantizer_bits = 1
+# params.setBlocklength(2)
+# params.set_PAM()
+# params.setScheme('separate')
+# params.set_random_code()
 
 
 def generate_filename(SNR_dB, alpha, i, quantizer_bits=1, code_blocklength=1):
